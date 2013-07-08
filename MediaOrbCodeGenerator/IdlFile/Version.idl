@@ -1,0 +1,27 @@
+module Version
+{
+	typedef ushort ErrorCode;
+	const ErrorCode SUCCESS = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+	const ErrorCode ACCESS_VIOLATION = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED = 0x0004;
+	const ErrorCode RESERVED = 0x0005;
+	const ErrorCode INVALID_PARAMETER = 0x0006;
+	const ErrorCode RESOURCE_LIMIT = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT = 0x000a;
+	const ErrorCode LOCAL = 0x000b;
+	const ErrorCode STANDBY = 0x000c;
+
+    enum OperationId
+    {
+    	GET_VERSION
+    };
+    
+    interface Version
+	{
+		Version getVersion();
+	};
+};

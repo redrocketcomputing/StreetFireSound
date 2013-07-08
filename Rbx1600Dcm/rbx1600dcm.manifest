@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+DCMCU-NAME: Rbx1600Dcm
+DCMCU-MANUFACTURE: StreetFireSound Labs, LLC
+DCMCU-DESCRIPTION: RBX1600 Primary Device Control Module
+DCMCU-CLASSNAME: com.redrocketcomputing.havi.iav.rbx1600.dcm.DcmCodeUnit
+DCMCU-PROPERTIES: configuration/rbx1600dcm.properties

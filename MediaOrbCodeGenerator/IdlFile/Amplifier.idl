@@ -1,0 +1,89 @@
+module Amplifier
+{
+	const FcmAttributeIndicator AMPLIFIER_VOLUME = 0x0001;
+	const FcmAttributeIndicator AMPLIFIER_MUTE = 0x0002;
+	const FcmAttributeIndicator AMPLIFIER_BALANCE = 0x0003;
+	const FcmAttributeIndicator AMPLIFIER_LOUDNESS = 0x0004;
+	const FcmAttributeIndicator AMPLIFIER_EQUALIZER = 0x0005;
+	const FcmAttributeIndicator AMPLIFIER_PRESET_MODE = 0x0006;
+	
+	enum AmplifierCapabiliy
+	{
+		BALANCE,
+		LOUDNESS,
+		EQUALIZER,
+		PRESET
+	};
+	
+	struct EqualizerFrequency
+	{
+		ushort lowestFrequency;
+		ushort highestFrequency;
+	};
+	
+	enum AmplifierPresetMode
+	{
+		OFF,
+		SPEECH,
+		MOVIE,
+		MUSIC_CLASSICAL,
+		MUSIC_JAZZ,
+		MUSIC_ROCK
+	};
+	
+	typedef ushort ErrorCode;
+	const ErrorCode SUCCESS = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+	const ErrorCode ACCESS_VIOLATION = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED = 0x0004;
+	const ErrorCode RESERVED = 0x0005;
+	const ErrorCode INVALID_PARAMETER = 0x0006;
+	const ErrorCode RESOURCE_LIMIT = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT = 0x000a;
+	const ErrorCode LOCAL = 0x000b;
+	const ErrorCode STANDBY = 0x000c;
+
+	enum OperationId
+	{
+		SET_VOLUME,
+		GET_VOLUME,
+		SET_MUTE,
+		GET_MUTE,
+		SET_BALANCE,
+		GET_BALANCE,
+		SET_LOUDNESS,
+		GET_LOUDNESS,
+		GET_CAPABILITY,
+		SET_EQUALIZER,
+		GET_EQUALIZER,
+		GET_EQUALIZER_CAPABILITY,
+		SET_PRESET_MODE,
+		GET_PRESET_MODE,
+		GET_RESET_MODE_CAPABILITY,
+		GET_AUDIO_LATENCY
+	};
+
+	interface Amplifier
+	{
+		void setVolume(in octet volumeValue);
+		octet getVolume();
+		void setMute(in boolean muteState);
+		boolean getMute();
+		void setBalance(in octet balanceValue);
+		octet getBalance();
+		void setLoudness(in boolean loudnessValue);
+		boolean getLoudness();
+		sequence<boolean> getCapability();
+		void setEqualizer(in sequence<octet> equalizerValue);
+		sequence<octet> getEqualizer();
+		void setPresetMode(in AmplifierPresetMode amplifierPresetMode);
+		AmplifierPresetMode getPresetMode();
+		sequence<boolean> getPresetCapability();
+		ushort getAudioLatency();
+	};
+	
+	
+};

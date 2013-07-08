@@ -1,0 +1,159 @@
+<!--
+ Copyright (C) 2005 by StreetFire Sound Labs
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+ $Id $
+-->
+
+<project name="Client" default="dist" basedir=".">
+  <description>
+    Client for Rbx1600 operation
+  </description>
+
+  <condition property="dev" value="true">
+    <isset property="eclipse.running"/>
+  </condition>
+
+  <!-- tweak classpath if a dev build -->
+  <condition property="classpath" value="../Util/bin:../MediaOrb/bin:../Rbx1600/bin:../Rbx1600Dcm/bin:../MediaManagerAm/bin:../Rbx1600Dcm/rbx1600clientlib-bin">
+    <isset property="dev"/>
+  </condition>
+
+  <!-- default classpath looks in lib dirs -->
+  <property name="classpath"                value="./lib/util.jar:./lib/mediaorb.jar:./lib/rbx1600.jar:./lib/rbx1600dcm.jar:./lib/mediamanageram.jar:../lib/rbx1600-client.jar"/>
+
+  <!-- path properties -->
+  <property name="src.dir"     location="src"/>
+  <property name="bin.dir"     location="bin"/>
+  <property name="dist.dir"    location="dist"/>
+  <property name="javadoc.dir" location="doc"/>
+
+  <!-- compiler settings -->
+  <property name="debug" value="on"/>
+  <property name="target.version" value="1.4"/>
+  <property name="source.version" value="1.4"/>
+
+  <!-- default value for tag (placed in jar manifest) -->
+  <property name="client.tag" value="DEVELOPMENT"/>
+
+  <!-- initialize build -->
+  <target name="init">
+
+    <!-- Create the time stamp -->
+    <tstamp/>
+
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${bin.dir}"/>
+  </target>
+
+
+  <!-- compile the client library -->
+  <target name="compile" depends="init" description="compile the source"> 
+
+    <!-- Compile the java code from ${src.dir} into ${bin.dir} -->
+    <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="${debug}" target="${target.version}" source="${source.version}" classpath="${classpath}"/>
+
+  </target>
+
+  <!-- clean build -->
+  <target name="cleancompile">
+    <ant target="clean"/>
+    <ant target="compile"/>
+  </target>
+
+  <!-- make javadocs -->
+  <target name="javadocs" depends="init" description="prepare javadoc documentation">
+    <mkdir dir="${javadoc.dir}"/>
+    <javadoc destdir="${javadoc.dir}"
+             sourcepath="${src.dir}"
+             packagenames="com.redrocketcomputing.*"
+             use="true"
+             windowtitle="documentation"
+             author="false"
+             private="false">
+    </javadoc>
+  </target>
+
+
+  <!-- build the distribution -->
+  <target name="dist" depends="compile" description="generate the distribution">
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist.dir}/lib"/>
+    <mkdir dir="${dist.dir}/src"/>
+
+    <!-- jar it up -->
+    <jar jarfile="${dist.dir}/lib/client.jar" basedir="${bin.dir}">
+
+      <!-- include manifest with main class and version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${client.tag}"/>
+        <attribute name="Main-Class"     value="com.redrocketcomputing.rbx1600.gui.GuiApplication"/>
+      </manifest>
+
+      <!-- include images, icons -->
+      <fileset dir="resources">
+        <include name="images/*.gif"/>
+        <include name="images/*.jpg"/>
+      </fileset>
+    </jar>
+
+    <!-- copy the other required jars -->
+    <!--copy todir="${dist.dir}/lib/"copy-->
+
+    <!-- copy properties  -->
+    <copy file="configuration/application.properties.release" tofile="${dist.dir}/application.properties">
+    </copy>
+
+    <!-- copy icon files  -->
+    <mkdir dir="${dist.dir}/icons"/>
+    <copy todir="${dist.dir}/icons">
+      <fileset dir="resources/icons"/>
+    </copy>
+
+    <!-- create src jar -->
+    <jar jarfile="${dist.dir}/src/client-src.jar" basedir="${src.dir}">
+
+      <!-- include manifest with version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${client.tag}"/>
+      </manifest>
+    </jar>
+  </target>
+
+
+  <!-- run the dist (XXX:0:20041019iain:not useful as it quits after 10 seconds - ??) -->
+  <target name="run" depends="dist" description="run from built distribution">
+    <java classname="com.redrocketcomputing.rbx1600.gui.GuiApplication">
+      <classpath>
+        <fileset refid="project.jars"/>
+        <pathelement location="${dist.dir}/lib/client.jar"/>
+      </classpath>
+      <arg value="${dist.dir}/application.properties"/>
+    </java>
+  </target>
+
+
+  <!-- clean up -->
+  <target name="clean" description="clean up">
+    <delete dir="${bin.dir}"/>
+    <delete dir="${dist.dir}"/>
+  </target>
+
+</project>

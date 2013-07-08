@@ -1,0 +1,84 @@
+<project name="MediaManagerAm" default="dist" basedir=".">
+  <description>
+    Media Manager App Module
+  </description>
+
+  <!-- tweak classpath if a dev build -->
+  <condition property="classpath" value="../Util/bin:../MediaOrb/bin:../Rbx1600/bin:../Rbx1600Dcm/bin:../Rbx1600Dcm/rbx1600clientlib-bin">
+    <isset property="dev"/>
+  </condition>
+
+  <!-- default classpath looks in lib dirs -->
+  <property name="classpath" value="./lib/util.jar:./lib/mediaorb.jar:./lib/rbx1600.jar:./lib/rbx1600dcm.jar:./lib/rbx1600dcm-client.jar"/>
+
+  <!-- path properties -->
+  <property name="src.dir"     location="src"/>
+  <property name="rmi.src.dir" location="RMI"/>
+  <property name="bin.dir"     location="bin"/>
+  <property name="dist.dir"    location="dist"/>
+  <property name="javadoc.dir" location="doc"/>
+
+  <!-- compiler settings -->
+  <property name="debug" value="on"/>
+  <property name="target" value="1.4"/>
+
+  <!-- default value for tag (placed in jar manifest) -->
+  <property name="mediamanageram.tag" value="DEVELOPMENT"/>
+
+  <!-- initialize build -->
+  <target name="init">
+
+    <!-- Create the time stamp -->
+    <tstamp/>
+
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${bin.dir}"/>
+  </target>
+
+
+  <!-- compile the client library -->
+  <target name="compile" depends="init" description="compile the source"> 
+    <!-- Compile the java code from ${src.dir} into ${bin.dir} -->
+    <javac destdir="${bin.dir}" debug="${debug}" target="${target}" classpath="${classpath}">
+      <src path="${src.dir}"/>
+      <src path="${rmi.src.dir}"/>
+    </javac>
+  </target>
+
+  <!-- build the distribution -->
+  <target name="dist" depends="compile" description="generate the distribution">
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist.dir}/lib"/>
+    <mkdir dir="${dist.dir}/src"/>
+
+    <!-- jar it up -->
+    <jar jarfile="${dist.dir}/lib/mediamanageram.jar" basedir="${bin.dir}">
+
+      <!-- include manifest with main class and version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${mediamanageram.tag}"/>
+        <attribute name="Main-Class"     value="com.redrocketcomputing.rbx1600.gui.GuiApplication"/>
+      </manifest>
+    </jar>
+
+    <!-- create src jar -->
+    <jar jarfile="${dist.dir}/src/mediamanageram-src.jar" basedir="${src.dir}">
+
+      <!-- include manifest with version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${mediamanageram.tag}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <!-- clean up -->
+  <target name="clean" description="clean up">
+    <delete dir="${bin.dir}"/>
+    <delete dir="${dist.dir}"/>
+  </target>
+
+</project>

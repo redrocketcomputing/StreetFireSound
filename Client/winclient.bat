@@ -1,0 +1,1 @@
+java -ea -cp .\resources;bin\;lib\hsqldb.jar;..\LiquidLnF\bin;..\LiquidLnF\src;..\MediaManagerAm\bin;..\Rbx1600Dcm\rbx1600clientlib-bin;..\Rbx1600Dcm\bin;..\Rbx1600\bin;..\MediaOrb\bin;..\Util\bin com.streetfiresound.client.AppFramework -c configuration\application.properties

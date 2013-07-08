@@ -1,0 +1,25 @@
+(ExpressProject ""
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (File ".\streetracer_schem_c2.1_030625.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (NoModify))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources" ".\streetracer_schem_c2.1_030625.dsn")
+      (Path "Design Resources" ".\streetracer_schem_c2.1_030625.dsn"
+         "StreetRacer")
+      (Select "Design Resources" ".\streetracer_schem_c2.1_030625.dsn"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 2 3 -1 -1 -4 -30 0 200 0 572"))
+      (Tab 0))))

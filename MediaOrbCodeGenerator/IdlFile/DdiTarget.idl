@@ -1,0 +1,625 @@
+module DdiTarget
+{
+
+	typedef octet DdiColor[4];
+	typedef sequence<octet>	Bitmap;
+	typedef sequence<octet>	Sound;
+
+
+	enum DdiElementType
+	{
+		DDI_PANEL,
+		DDI_HELP_PANEL,
+		DDI_ALERT_PANEL,
+		DDI_GROUP,
+		DDI_PANELLINK,
+		DDI_BUTTON,
+		DDI_BASICBUTTON,
+		DDI_TOGGLE,
+		DDI_ANIMATION,
+		DDI_SHOWRANGE,
+		DDI_SETRANGE,
+		DDI_ENTRY,
+		DDI_CHOICE,
+		DDI_TEXT,
+		DDI_STATUS,
+		DDI_ICON
+	};
+
+
+	enum OperationId
+	{
+		SUBSCRIBE,
+		UNSUBSCRIBE,
+		GET_DDI_ELEMENT,
+		GET_DDI_PANEL,
+		GET_DDI_ELEMENT_LIST,
+		GET_DDI_CONTENT,
+		CHANGE_SCOPE,
+		USER_ACTION
+	};
+
+
+
+		typedef ushort ErrorCode;
+		const ErrorCode SUCCESS = 0x0000;
+		const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+		const ErrorCode ACCESS_VIOLATION = 0x0002;
+		const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+		const ErrorCode NOT_IMPLEMENTED = 0x0004;
+		const ErrorCode RESERVED = 0x0005;
+		const ErrorCode INVALID_PARAMETER = 0x0006;
+		const ErrorCode RESOURCE_LIMIT = 0x0007;
+		const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+		const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+		const ErrorCode INCOMPLETE_RESULT = 0x000a;
+		const ErrorCode LOCAL = 0x000b;
+		const ErrorCode STANDBY = 0x000c;
+
+		const ErrorCode NO_DEI = 0x0080;
+		const ErrorCode NO_SUB = 0x0081;
+		const ErrorCode NO_PANEL = 0x0082;
+		const ErrorCode NO_GROUP = 0x0083;
+		const ErrorCode NOT_CUR = 0x0084;
+
+
+	enum DdiContentType
+	{
+		UNICODE,
+		PNG,
+		HAVI_RAW_BITMAP,
+		AIFF_C,
+		JPEG
+	};
+
+	enum NotificationScope
+	{
+		CURENT,
+		GLOBAL,
+		ADD
+	};
+
+	enum Interactivity
+	{
+		ENABLED,
+		DISABLED
+	};
+
+	enum InformTarget
+	{
+		INCREMENTALLY,
+		COMPLETE
+	};
+
+
+	enum Fontsize
+	{
+		SMALL,
+		MEDIUM,
+		LARGE
+	};
+
+
+	enum HorizontalPosition
+	{
+		LEFT,
+		CENTER,
+		RIGHT
+	};
+
+	enum VerticalPosition
+	{
+		TOP,
+		MIDDLE,
+		BOTTOM
+	};
+
+	enum EntryType
+	{
+		TEXTUAL,
+		NAT_NUMBER,
+		FLOAT,
+		DATE,
+		TIME
+	};
+
+	enum Qualifier
+	{
+		CONCEL,
+		VISIBLE
+	};
+
+
+	enum RepetitionType
+	{
+		PLAY_ONCE,
+		PLAY_REPEATEDLY,
+		PLAY_ALTERNATING
+	};
+
+
+
+
+	enum OrientationType
+	{
+		LINEAR_HORIZONTAL,
+		LINEAR_VERTICAL,
+		CIRCULAR
+	};
+
+
+
+	enum ChoiceType
+	{
+		LESS_THAN,
+		EQUAL,
+		MORE_THAN
+	};
+
+	enum WrapType
+	{
+		DONT_CARE,
+		STOP_AT_BORDERS,
+		WRAP_AROUND
+	};
+
+	enum ChoiceOrientationType
+	{
+		horizontal,
+		vertical
+	};
+
+
+
+	enum ActType
+	{
+		ACT_BUTTON,
+		ACT_TOGGLE,
+		ACT_SETRANGE,
+		ACT_ENTRY,
+		ACT_CHOICE,
+		ACT_SELECTED,
+		ACT_ANIMATION
+	};
+
+	enum ActButton
+	{
+		PRESS,
+		RELEASE
+	};
+
+
+
+	struct DdiElementId
+	{
+		DdiElementType	ddiElementType;
+		ushort	ddiElementHandle;
+	};
+	typedef sequence<DdiElementId>	DdiElementIdList;
+
+
+
+	union DdiContent switch (DdiContentType)
+	{
+		case UNICODE:	wstring unicodeText;
+		case PNG:	Bitmap	pngBitmap;
+		case HAVI_RAW_BITMAP:	Bitmap	rawBitmap;
+		case AIFF_C:	Sound	AIFF_C_sound;
+		case JPEG:	Bitmap	jpegBitmap;
+	};
+
+
+
+	struct DdiContentId
+	{
+		DdiContentType	ddiContentType;
+		ushort	ddiContentHandle;
+		uint	ddiContentSize;
+	};
+
+
+	struct AudioVideo
+	{
+		SEID	dcm;
+		uint	handle;
+	};
+
+	struct Audio
+	{
+		SEID	dcm;
+		uint	handle;
+	};
+
+	typedef wstring<16> Label;
+
+
+	struct Pattern
+	{
+		ushort	height;
+		ushort	width;
+		DdiContentId	patternBitmapId;
+	};
+
+
+	struct Position
+	{
+		ushort	xPosition;
+		ushort	yPosition;
+	};
+
+
+	struct SafetyAreaPosition
+	{
+		HorizontalPosition	horizontalPosition;
+		VerticalPosition	verticalPosition;
+	};
+
+	struct FocusNavigation
+	{
+		DdiElementId	up;
+		DdiElementId	down;
+		DdiElementId	left;
+		DdiElementId	right;
+	};
+
+	typedef DdiContentId	DdiTitle;
+
+
+	enum OptAttrType
+	{
+		POSITION,
+		SAFETY_AREA_POSITION,
+		BACKGROUND_COLOR,
+		BACKGROUND_PATTERN,
+		BACKGROUND_PICTURE_LINK,
+		AUDIO_VIDEO,
+		AUDIO,
+		DEVICE_ICON_BITMAP,
+		CONTENT_ICON_BITMAP,
+		PRESSED_BITMAP_LINK,
+		RELEASED_BITMAP_LINK,
+		HOTLINK,
+		FONTSIZE,
+		FOCUS_NAVIGATION,
+		INITIAL_FOCUS,
+		SHOW_WITH_PARENT,
+		TITLE,
+		VALUE_OFFSET,
+		VALUE_POWER10,
+		MAX_LABEL,
+		MIN_LABEL,
+		CENTER_LABEL,
+		UNIT_LABEL,
+		FOCUS_SOUND_LINK,
+		PRESSED_SOUND_LINK,
+		RELEASED_SOUND_LINK,
+		SELECT_SOUND_LINK,
+		HELP_PANEL_LINK,
+		PLAYBACK_DURATION,
+		RECORDED_DATETIME,
+		BROADCAST_DATETIME
+	};
+
+
+	union OptionalAttribute switch (OptAttrType)
+	{
+		case POSITION:			Position	position;
+		case SAFETY_AREA_POSITION:	SafetyAreaPosition	safetyAreaPosition;
+		case BACKGROUND_COLOR:		DdiColor	backgroundColor;
+		case BACKGROUND_PATTERN:	Pattern	backgroundPattern;
+		case BACKGROUND_PICTURE_LINK:	DdiContentId	backgroundPicture;
+		case AUDIO_VIDEO:		AudioVideo	audioVideo;
+		case AUDIO:			Audio	audio;
+		case DEVICE_ICON_BITMAP:	Bitmap	deviceIconBitmap;
+		case CONTENT_ICON_BITMAP:	Bitmap	contentIconBitmap;
+		case PRESSED_BITMAP_LINK:	DdiContentId	pressedBitmap;
+		case RELEASED_BITMAP_LINK:	DdiContentId	releasedBitmap;
+		case HOTLINK:	wstring<256>	hotlink;
+		case FONTSIZE:	Fontsize	fontSize;
+		case FOCUS_NAVIGATION:		FocusNavigation	focusNavigation;
+		case INITIAL_FOCUS:		DdiElementId	initialfocus;
+		case SHOW_WITH_PARENT:		boolean	showWithParent;
+		case TITLE:	DdiTitle	titledDdiContentId;
+		case VALUE_OFFSET:		short	valueOffset;
+		case VALUE_POWER10:		short	valuePower10;
+		case MAX_LABEL:			Label	maxLabel;
+		case MIN_LABEL:			Label	minLabel;
+		case CENTER_LABEL:		Label	centerLabel;
+		case UNIT_LABEL:		Label	unitLabel;
+		case FOCUS_SOUND_LINK:		DdiContentId	focusSound;
+		case PRESSED_SOUND_LINK:	DdiContentId	pressedSound;
+		case RELEASED_SOUND_LINK:	DdiContentId	releasedSound;
+		case SELECT_SOUND_LINK:		DdiContentId	selectSound;
+		case HELP_PANEL_LINK:		DdiContentId	helpPanelLink;
+		case PLAYBACK_DURATION:		DateTime	playbackDuration;
+		case RECORDED_DATETIME:		DateTime	recordedDateTime;
+		case BROADCAST_DATETIME:	DateTime	broadcastDateTime;
+	};
+
+
+	typedef sequence<OptionalAttribute>	OptAttrList;
+
+
+	enum AspectRatio
+	{
+		UNKNOWN_PIXEL_ASPECT_FORMAT,
+		PAL_720_BY_576_DISPLAY_4_BY_3_PIXEL_ASPECT_FORMAT,
+		NTSC_704_BY_480_DISPLAY_4_BY_3_PIXEL_ASPECT_FORMAT,
+		ARIB_720_BY_480_DISPLAY_4_BY_3_PIXEL_ASPECT_FORMAT,
+		PAL_720_BY_576_DISPLAY_16_BY_9_PIXEL_ASPECT_FORMAT,
+		ATSC_704_BY_480_DISPLAY_16_BY_9_PIXEL_ASPECT_FORMAT,
+		ARIB_720_BY_480_DISPLAY_16_BY_9_PIXEL_ASPECT_FORMAT
+	};
+
+	struct DdiPanel
+	{
+		DdiElementId	elemId;
+		Label	panelName;
+		ushort	height;
+		ushort	width;
+		AspectRatio	aspectRatio;
+		DdiElementIdList	elements;
+		OptAttrList	optionals;
+	};
+
+
+	struct DdiGroup
+	{
+		DdiElementId	elemId;
+		Label	groupName;
+		ushort	height;
+		ushort	width;
+		DdiElementIdList	elements;
+		OptAttrList	optionals;
+	};
+
+
+	struct DdiPanelLink
+	{
+		DdiElementId	elemId;
+		Label	linkName;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		DdiContentId	linkBitmap;
+		DdiElementId	panelLink;
+		OptAttrList	optionals;
+	};
+
+
+	struct DdiButton
+	{
+		DdiElementId	elemId;
+		Label	pressLabel;
+		Label	releasedLable;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		OptAttrList	optionals;
+	};
+
+
+	struct DdiBasicButton
+	{
+		DdiElementId	elemId;
+		Label	buttonname;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		DdiContentId	buttonBitmap;
+		OptAttrList	optionals;
+	};
+
+	struct ToggleState
+	{
+		Label	toggleStateName;
+		DdiContentId	toggleStateBitmap;
+	};
+
+	struct DdiToggle
+	{
+		DdiElementId	elemId;
+		Label	toggleName;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		ushort	numToggleStates;	// ( >1 )
+		sequence<ToggleState>	toggleStates;
+		ushort	currentToggleState;	// >= 0 and < numToggleStates
+		OptAttrList	optionals;
+	};
+
+	struct AnimationState
+	{
+		Label	animationStateName;
+		DdiContentId	animationStateBitmap;
+	};
+	struct DdiShowRange
+	{
+		DdiElementId	elemId;
+		Label	rangeName;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		OrientationType	orientation;
+		ushort	valueRange;
+		ushort	stepValue;
+		ushort	valueSet;
+		OptAttrList	optionals;
+	};
+
+
+	struct DdiSetRange
+	{
+		DdiElementId	elemId;
+		Label	rangeName;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		OrientationType	orientation;
+		ushort	valueRange;
+		ushort	stepValue;
+		ushort	valueSet;
+		InformTarget	informTarget;
+		OptAttrList	optionals;
+	};
+
+
+	union EntryFormats switch (EntryType)
+	{
+		case TEXTUAL: 	wstring<256>	entryString;
+		case NAT_NUMBER:	uint	entryLiteral;
+		case FLOAT:	float	entryFloat;
+		case DATE:	DateTime	entryDate;
+		case TIME:	DateTime	entryTime;
+	};
+
+
+	struct DdiEntry
+	{
+		DdiElementId	elemId;
+		Label	entryName;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		EntryType	entryType;
+		Qualifier	qualifier;
+		InformTarget	informTarget;
+		EntryFormats	currentEntry;
+		ushort	maxCharsDigits;
+		OptAttrList	optionals;
+	};
+
+
+
+	struct DdiAnimation
+	{
+		DdiElementId	elemId;
+		Label	animationName;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		RepetitionType	repetition;
+		ushort	animationStateDuration;
+		sequence<AnimationState>	animation;
+		OptAttrList	optionals;
+	};
+
+	struct ChoiceElement
+	{
+		Label	choiceName;
+		DdiContentId	choiceBitmapDdiContentId;
+		boolean	elementStatus;
+	};
+
+	struct DdiChoice
+	{
+		DdiElementId	elemId;
+		Label	choiceName;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		ChoiceType	choiceType;
+		ushort	choiceNumber;
+		WrapType	wrapType;
+		ChoiceOrientationType	choiceOrientationType;
+		sequence<ChoiceElement>	choiceList;
+		OptAttrList	optionals;
+	};
+
+
+	struct DdiText
+	{
+		DdiElementId	elemId;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		DdiContentId	textContent;
+		OptAttrList	optionals;
+	};
+
+	struct DdiStatus
+	{
+		DdiElementId	elemId;
+		Label	statusName;
+		ushort	height;
+		ushort	width;
+		ushort	currentStatus;
+		OptAttrList	optionals;
+	};
+
+
+	struct DdiIcon
+	{
+		DdiElementId	elemId;
+		Label	iconName;
+		ushort	height;
+		ushort	width;
+		Interactivity	interactivity;
+		DdiContentId	iconBitmap;
+		OptAttrList	optionals;
+	};
+	
+
+	union DdiElement switch (DdiElementType)
+	{
+		case DDI_PANEL:		DdiPanel	panel;
+		case DDI_HELP_PANEL:	DdiPanel	helpPanel;
+		case DDI_ALERT_PANEL:	DdiPanel	alertPanel;
+		case DDI_GROUP:		DdiGroup	group;
+		case DDI_PANELLINK:	DdiPanelLink	panelLink;
+		case DDI_BUTTON:	DdiButton	button;
+		case DDI_BASICBUTTON:	DdiBasicButton	basicButton;
+		case DDI_TOGGLE:	DdiToggle	toggle;
+		case DDI_ANIMATION:	DdiAnimation	animation;
+		case DDI_SHOWRANGE:	DdiShowRange	showRange;
+		case DDI_SETRANGE:	DdiSetRange	setRange;
+		case DDI_ENTRY:		DdiEntry	entry;
+		case DDI_CHOICE:	DdiChoice	choice;
+		case DDI_TEXT:		DdiText		text;
+		case DDI_STATUS:	DdiStatus	status;
+		case DDI_ICON:		DdiIcon		icon;
+	};
+	typedef sequence<DdiElement>	DdiElementList;
+
+
+	typedef ushort	ActToggle;
+	typedef short	ActAnimation;
+	typedef ushort	ActSetRange;
+	typedef EntryFormats	ActEntry;
+	typedef sequence<ushort>	ActChoiceList;
+	typedef boolean	ActSelected;
+
+	union DdiAction switch (ActType)
+	{
+		case ACT_BUTTON:	ActButton	button;
+		case ACT_TOGGLE:	ActToggle	toggle;
+		case ACT_ANIMATION:	ActAnimation	animation;
+		case ACT_SETRANGE:	ActSetRange	setRange;
+		case ACT_ENTRY:		ActEntry	entry;
+		case ACT_CHOICE:	ActChoiceList	choiceList;
+		case ACT_SELECTED:	ActSelected	selected;
+	};
+
+
+
+
+
+
+	interface DdiTarget
+	{
+		DdiElementId Subscribe ( in OperationCode opCode, in NotificationScope scope);
+		void Unsubscribe();
+		DdiElement GetDdiElement(in DdiElementId elementId);
+		//Status GetDdiPanel(in DdiElementId elementId, out DdiPanel panel, out DdiElementList elementList);
+		//Status GetDdiGroup(in DdiElementId elementId, out DdiGroup group, out DdiElementList elementList);
+		DdiElementList GetDdiElementList(in DdiElementIdList elementIdList);
+		DdiContent GetDdiContent( in DdiContentId ceid);
+		void ChangeScope ( in NotificationScope scope);
+
+		//Status UserAction( in DdiElementId elementId, in DdiAction action, out DdiElementId targetPanel, out DdiElementIdList report, out DdiElementIdList deletedPanelList);
+		//Status<Client> NotifyDdiChange( in DdiElementId targetPanel, in DdiElementIdList report, in DdiElementIdList deletedPanelList);
+	};
+
+
+};

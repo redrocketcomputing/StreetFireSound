@@ -1,0 +1,325 @@
+# File:  APP_RBX_CC_top.ucf
+# Date:   3-15-04
+#
+# Author: R. Bauer
+# User Constraint File for RBX_Companion_top.vhd (top level module)
+# For StreetRacer CPU Card to Application Board Interface
+# Created 1-27-04
+#
+# Modified SLINK Names, 2-12-04, REB
+# Reduced clock timing from 17 to 15ns, 2-24-04
+# Removed CLK_3_6MHz input to preserve global clock  buffer, REB 3-7-04
+# Updated timing constraints to match Test Board version, REB 3-7-04
+# Added I2S Clock constraints REB, 3-12-04
+# Separated CLK_I_LOGIC TIMEGRP into PADS, FFS, LATCHES, BRAMS
+#
+# Target Devices:
+# Xilinx Spartan IIE, FT256 Package (XC2S50E, XC2S100E, XC2S150E, XC2S200E, XC2S300E, XC2S400E)
+CONFIG PART = XC2S400E-FT256-6 ;
+#
+#**************************************************************************
+# New Constraints (3-7-04 forward)
+#**************************************************************************
+CONFIG KEEP_HIERARCHY=TRUE;
+#
+#TIMING:
+# 
+NET "XS_SDCLK0" PERIOD = 10 ns; 
+NET "XS_SDCLK0" TNM_NET = "XS_SDCLK0"; 
+NET "CLK_I" PERIOD = 15 ns;
+NET "CLK_I" TNM_NET = "CLK_I";
+#TIMEGRP "CLK_I_LOGIC" = "PADS" "FFS" "RAMS" "BRAMS_PORTA" "BRAMS_PORTB" "LATCHES";
+#TIMEGRP "CLK_I_LOGIC" = "PADS" "FFS" "LATCHES";
+#TIMESPEC "TS_CLK_I" = FROM "CLK_I" TO "CLK_I_LOGIC" 15 ns;
+#TIMEGRP "CLK_I_LOGIC" = "FFS" "LATCHES";
+#TIMESPEC "TS_CLK_I_LOGIC" = FROM "CLK_I" TO "CLK_I_LOGIC" 15 ns;
+# 3-15-04 separated time groups for CLK_I 
+TIMEGRP "CLK_I_PADS" = "PADS" ;
+TIMESPEC "TS_CLK_I_PADS" = FROM "CLK_I" TO "CLK_I_PADS" 15 ns;
+#
+TIMEGRP "CLK_I_FFS" = "FFS";
+TIMESPEC "TS_CLK_I_FFS" = FROM "CLK_I" TO "CLK_I_FFS" 15 ns;
+# latches gets removed during synth
+#TIMEGRP "CLK_I_LATCHES" = "LATCHES";
+#TIMESPEC "TS_CLK_I_LATCHES" = FROM "CLK_I" TO "CLK_I_LATCHES" 15 ns;
+#
+TIMEGRP "CLK_I_RAMS" = "RAMS";
+TIMESPEC "TS_CLK_I_RAMS" = FROM "CLK_I" TO "CLK_I_RAMS" 15 ns;
+#
+TIMEGRP "CLK_I_BRAMS_PORTA" = "BRAMS_PORTA";
+TIMESPEC "TS_CLK_I_BRAMS_PORTA" = FROM "CLK_I" TO "CLK_I_BRAMS_PORTA" 15 ns;
+#brams_portb not present
+#TIMEGRP "CLK_I_BRAMS_PORTB" = "BRAMS_PORTB";
+#TIMESPEC "TS_CLK_I_BRAMS_PORTB" = FROM "CLK_I" TO "CLK_I_BRAMS_PORTB" 15 ns;
+#
+NET "I2S_MCLK_GCK3_IBUFG" PERIOD = 40 ns;  # mclk is 88ns period
+NET "I2S_MCLK_GCK3_IBUFG" TNM_NET = "I2S_MCLK_GCK3_IBUFG";
+TIMEGRP "I2S_MCLK_GCK3_IBUFG_LOGIC" = "PADS" "FFS" "LATCHES";
+TIMESPEC "TS_I2S_MCLK_GCK3_IBUFG" = FROM "I2S_MCLK_GCK3_IBUFG" TO "I2S_MCLK_GCK3_IBUFG_LOGIC" 30 ns;
+#
+#NET "I2S_SCLK_GCK1_IBUFG" PERIOD = 40 ns;  # sclk is 4*88ns period
+#NET "I2S_SCLK_GCK1_IBUFG" TNM_NET = "I2S_SCLK_GCK1_IBUFG";
+#TIMEGRP "I2S_SCLK_GCK1_IBUFG_LOGIC" = "PADS" "FFS" "LATCHES";
+#TIMESPEC "TS_I2S_SCLK_GCK1_IBUFG" = FROM "I2S_SCLK_GCK1_IBUFG" TO "I2S_SCLK_GCK1_IBUFG_LOGIC" 30 ns;
+#
+#--------------------------------------------------------------------------------------
+# Global constraints:
+# 
+# 
+TIMESPEC "TS_ffs_BRAMS_PORTA" = FROM "FFS" TO "BRAMS_PORTA" 15 ns; 
+TIMESPEC "TS_BRAMS_PORTA_ffs" = FROM "BRAMS_PORTA" TO "FFS" 15 ns; 
+#
+# BRAMS_PORTB is not used in XAPP175-based fifos => comment out for build
+# TIMESPEC "TS_ffs_BRAMS_PORTB" = FROM "FFS" TO "BRAMS_PORTB" 15 ns; 
+# TIMESPEC "TS_BRAMS_PORTB_ffs" = FROM "BRAMS_PORTB" TO "FFS" 15 ns; 
+#
+TIMESPEC "TS_ffs_RAMS" = FROM "FFS" TO "RAMS" 15 ns; 
+TIMESPEC "TS_RAMS_ffs" = FROM "RAMS" TO "FFS" 15 ns; 
+#
+TIMESPEC "TS_ffs_ffs" = FROM "FFS" TO "FFS" 15 ns; 
+TIMESPEC "TS_ffs_pads" = FROM "FFS" TO "PADS" 15 ns; 
+TIMESPEC "TS_pads_ffs" = FROM "PADS" TO "FFS" 15 ns; 
+TIMESPEC "TS_P2P" = FROM "PADS" TO "PADS" 15 ns; 
+#--------------------------------------------------------------------------------------
+#**************************************************************************
+#
+# OLD TIMING(before 3-7-04)
+#TIMING:
+# Timing
+#NET "XS_SDCLK0" PERIOD = 10 ns; 
+#NET "XS_SDCLK0" TNM_NET = "XS_SDCLK0"; 
+#NET "CLK_I" PERIOD = 15 ns;
+#--------------------------------------------------------------------------------------
+# Global constraints:
+#TIMESPEC "TS_ffs_pads" = FROM "FFS" TO "PADS" 15 ns; 
+#TIMESPEC "TS_pads_ffs" = FROM "PADS" TO "FFS" 15 ns; 
+#TIMESPEC "TS_P2P" = FROM "PADS" TO "PADS" 15 ns; 
+#--------------------------------------------------------------------------------------
+#
+################################################################################
+#
+################################################################################
+# I/O Assignment
+################################################################################
+#
+#
+# Pre-assigned FPGA IO
+#
+# FPGA Clock Inputs
+#
+NET "XS_SDCLK0" LOC = "B8" ; #GCK2
+# 3-7-04 removed to preserve global clk buf NET "CLK_3_6MHz" LOC = "T9" ;  #GCK0
+#
+# FPGA Config Pins
+#
+NET "XS_DREQ1" LOC = "L16" ;
+NET "XS_DREQ0" LOC = "L13" ;
+NET "XS_CS5n" LOC = "J14" ;
+NET "XS_CS4n" LOC = "G15" ;
+NET "XS_CS3n" LOC = "F14" ;
+NET "XS_CS2n" LOC = "E15" ;
+NET "XS_CS1n" LOC = "B16" ;
+NET "XS_SDATA_IN1" LOC = "A14" ;
+NET "XS_SYNC" LOC = "C15" ;
+NET "XS_SDATA_OUT" LOC = "A13" ;
+NET "xs_SDATA_IN0" LOC = "P15" ;
+NET "xs_BITCLK" LOC = "P16" ; 
+#
+# 
+#
+# X-Scale IO Bus Signals
+#
+NET "xs_ma<0>" LOC = "N7" ;
+NET "xs_ma<1>" LOC = "P7" ;
+NET "xs_ma<10>" LOC = "P9" ;
+NET "xs_ma<11>" LOC = "T10" ;
+NET "xs_ma<12>" LOC = "R10" ;
+NET "xs_ma<13>" LOC = "P10" ;
+NET "xs_ma<14>" LOC = "R11" ;
+NET "xs_ma<15>" LOC = "T11" ;
+NET "xs_ma<16>" LOC = "N10" ;
+NET "xs_ma<17>" LOC = "M10" ;
+NET "xs_ma<18>" LOC = "P11" ;
+NET "xs_ma<19>" LOC = "B10" ;
+NET "xs_ma<2>" LOC = "R7" ;
+NET "xs_ma<20>" LOC = "D12" ;
+NET "xs_ma<21>" LOC = "C9" ;
+NET "xs_ma<22>" LOC = "A10" ;
+NET "xs_ma<3>" LOC = "T7" ;
+NET "xs_ma<4>" LOC = "M7" ;
+NET "xs_ma<5>" LOC = "N8" ;
+NET "xs_ma<6>" LOC = "P8" ;
+NET "xs_ma<7>" LOC = "R8" ;
+NET "xs_ma<8>" LOC = "A8" ;
+NET "xs_ma<9>" LOC = "R9" ;
+NET "xs_md<0>" LOC = "E10" ;
+NET "xs_md<1>" LOC = "H15" ;
+NET "xs_md<10>" LOC = "D11" ;
+NET "xs_md<11>" LOC = "E11" ;
+NET "xs_md<12>" LOC = "B11" ;
+NET "xs_md<13>" LOC = "C11" ;
+NET "xs_md<14>" LOC = "D10" ;
+NET "xs_md<15>" LOC = "A11" ;
+NET "xs_md<16>" LOC = "J15" ;
+NET "xs_md<17>" LOC = "K16" ;
+NET "xs_md<18>" LOC = "J13" ;
+NET "xs_md<19>" LOC = "K12" ;
+NET "xs_md<2>" LOC = "G14" ;
+NET "xs_md<20>" LOC = "L14" ;
+NET "xs_md<21>" LOC = "K14" ;
+NET "xs_md<22>" LOC = "L12" ;
+NET "xs_md<23>" LOC = "L15" ;
+NET "xs_md<24>" LOC = "K15" ;
+NET "xs_md<25>" LOC = "H16" ;
+NET "xs_md<26>" LOC = "C10" ;
+NET "xs_md<27>" LOC = "D9" ;
+NET "xs_md<28>" LOC = "K13" ;
+NET "xs_md<29>" LOC = "J16" ;
+NET "xs_md<3>" LOC = "F16" ;
+NET "xs_md<30>" LOC = "G16" ;
+NET "xs_md<31>" LOC = "H14" ;
+NET "xs_md<4>" LOC = "H13" ;
+NET "xs_md<5>" LOC = "D16" ;
+NET "xs_md<6>" LOC = "F13" ;
+NET "xs_md<7>" LOC = "E16" ;
+NET "xs_md<8>" LOC = "G13" ;
+NET "xs_md<9>" LOC = "F15" ;
+NET "xs_npwe" LOC = "A12" ;
+NET "xs_noe" LOC = "E14" ;
+NET "xs_rdnwr" LOC = "A9" ;
+NET "xs_rdy" LOC = "B9" ;  # also gpio 18
+#NET "xs_sdcke0" LOC = "R13" ;
+NET "xs_dqm<0>" LOC = "C16" ;
+NET "xs_dqm<1>" LOC = "P13" ;
+NET "xs_dqm<2>" LOC = "T12" ;
+NET "xs_dqm<3>" LOC = "N16" ;
+#
+# Other XSCALE Signals
+NET "xs_pwm0" LOC = "F12" ;  # FPGA Interrupt Output to CPU GPIO 16 
+NET "xs_pwm1" LOC = "T13" ;  # FPGA Reset Input from CPU GPIO 17
+#
+#NET "xs_nacreset" LOC = "N9" ; # non gpio xscale signal for AC97 
+#NET "xs_niois16" LOC = "R12" ; # gpio 57/pcmcia/cf
+#NET "xs_npce1" LOC = "D15" ;   # gpio 52/pcmcia/cf
+#NET "xs_npce2" LOC = "T14" ;   # gpio 53/pcmcia/cf
+#NET "xs_npior" LOC = "C12" ;   # gpio 50/pcmcia/cf
+#NET "xs_npiow" LOC = "R14" ;   # gpio 51/pcmcia/cf
+#NET "xs_npoe" LOC = "P12" ;    # gpio 48/pcmcia/cf
+#NET "xs_npreg" LOC = "N15" ;   # gpio 55/pcmcia/cf
+#NET "xs_npsktsel" LOC = "M16" ;# gpio 54/pcmcia/cf
+#NET "xs_npwait" LOC = "G12" ;  # gpio 56/pcmcia/cf
+#
+#####################################################################
+# 
+# FPGA IO connected to edge bus 
+#  (2 Clocks, 11 CPU/EDGE, 79 EDGE ONLY)
+# 
+# Note that for the 11 signals connected to both CPU and edge bus:
+# either 
+# 1.  The cpu signals must be tristated (see xscale 
+# documentation for gpio tristate control) when using these
+# as FPGA to Edge Bus Signals 
+# OR
+# 2.  The fpga outputs must be tristated (or defined as inputs) 
+# when these signals are used as direct mapped peripheral functions.
+#
+# UCF Entries from spreadsheet: FPGA_Edge_Signals_UCF_Generation.xls:
+#
+#ETHERNET MODULE SIGNALS:
+NET "ETH_D<0>" LOC = "E7";
+NET "ETH_D<1>" LOC = "C7";
+NET "ETH_D<2>" LOC = "B6";
+NET "ETH_D<3>" LOC = "A5";
+NET "ETH_D<4>" LOC = "A7";
+NET "ETH_D<5>" LOC = "D6";
+NET "ETH_D<6>" LOC = "D5";
+NET "ETH_D<7>" LOC = "B4";
+NET "ETH_D<8>" LOC = "G2";
+NET "ETH_D<9>" LOC = "A4";
+NET "ETH_D<10>" LOC = "B3";
+NET "ETH_D<11>" LOC = "C2";
+NET "ETH_D<12>" LOC = "D2";
+NET "ETH_D<13>" LOC = "K1";
+NET "ETH_D<14>" LOC = "E3";
+NET "ETH_D<15>" LOC = "E2";
+NET "ETH_D<16>" LOC = "F4";
+NET "ETH_D<17>" LOC = "F2";
+NET "ETH_D<18>" LOC = "K2";
+NET "ETH_D<19>" LOC = "H1";
+NET "ETH_D<20>" LOC = "H4";
+NET "ETH_D<21>" LOC = "L2";
+NET "ETH_D<22>" LOC = "J1";
+NET "ETH_D<23>" LOC = "K3";
+NET "ETH_D<24>" LOC = "G5";
+NET "ETH_D<25>" LOC = "G4";
+NET "ETH_D<26>" LOC = "L3";
+NET "ETH_D<27>" LOC = "M1";
+NET "ETH_D<28>" LOC = "N1";
+NET "ETH_D<29>" LOC = "L5";
+NET "ETH_D<30>" LOC = "M4";
+NET "ETH_D<31>" LOC = "N3";
+NET "ETH_BE_N<0>" LOC = "J3";
+NET "ETH_BE_N<1>" LOC = "A3";
+NET "ETH_BE_N<2>" LOC = "D3";
+NET "ETH_BE_N<3>" LOC = "C1";
+NET "ETH_A<1>" LOC = "D8";
+NET "ETH_A<2>" LOC = "D7";
+NET "ETH_A<3>" LOC = "B7";
+NET "ETH_CS" LOC = "G1";
+NET "ETH_ADS_N" LOC = "F3";
+NET "ETH_RD_N" LOC = "E4";
+NET "ETH_WR_N" LOC = "E1";
+NET "ETH_RESET" LOC = "M3";
+NET "ETH_INT" LOC = "K5";
+NET "ETH_CYCLE_N" LOC = "H2";
+NET "ETH_DATACS_N" LOC = "J2";
+NET "ETH_RDYRTN_N" LOC = "K4";
+NET "ETH_W_R_N" LOC = "J4";
+NET "ETH_LCLK" LOC = "F1";
+NET "ETH_LDEV_N" LOC = "G3";
+NET "ETH_IOWAIT" LOC = "F5";
+NET "ETH_VLBUS_N" LOC = "D1";
+# AUDIO PATH CONTROL and I2S SIGNALS:
+NET "I2S_MCLK_GCK3" LOC = "C8"; #GCK3
+NET "I2S_SCLK_GCK1" LOC = "T8"; #GCK1
+NET "I2S_MCLK" LOC = "N5";
+NET "I2S_SCLK" LOC = "R6";
+NET "I2S_LRCLK" LOC = "T5";
+NET "I2S_SDATA" LOC = "N6";
+NET "DA_INT_8405A" LOC = "T3";
+NET "DA_INT_8415A" LOC = "R4";
+NET "DAI_ENABLE" LOC = "B13";
+# SLINK/IR SIGNALS:
+NET "IR_RX" LOC = "N12";
+NET "IR_TX" LOC = "N11";
+NET "SL0_RX" LOC = "P4";
+NET "SL1_RX" LOC = "P5";
+NET "SL2_RX" LOC = "P6";
+NET "SL3_RX" LOC = "M6";
+NET "SL4_RX" LOC = "M14";
+NET "SL5_RX" LOC = "B12";
+NET "SL6_RX" LOC = "M15";
+NET "SL0_TX" LOC = "P2";
+NET "SL1_TX" LOC = "T4";
+NET "SL2_TX" LOC = "R5";
+NET "SL3_TX" LOC = "T6";
+NET "SL4_TX" LOC = "M11";
+NET "SL5_TX" LOC = "N14";
+NET "SL6_TX" LOC = "M13";
+# SWITCHES and LEDs:
+NET "LED_0" LOC = "M2";
+NET "LED_1" LOC = "L1";
+NET "LED_2" LOC = "L4";
+NET "LED_3" LOC = "N2";
+NET "LED_4" LOC = "P1";
+NET "SW_1" LOC = "C6";
+# UNUSED CPU/EDGE SIGNALS:
+#NET "FF_CTS" LOC = "E13";
+NET "FF_RTS" LOC = "D14";
+# UNUSED FPGA/EDGE SIGNALS:
+NET "FPGA_EB90" LOC = "B5";
+NET "FPGA_EB92" LOC = "A6";
+NET "FPGA_EB93" LOC = "E6";
+NET "FPGA_EB94" LOC = "C5";
+NET "FPGA_EB96" LOC = "C4";
+NET "FPGA_EB98" LOC = "H3";

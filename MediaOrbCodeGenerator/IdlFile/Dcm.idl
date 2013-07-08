@@ -1,0 +1,244 @@
+module Dcm
+{
+
+	typedef unsigned short InterfaceId;
+	typedef sequence<octet> ByteRow;
+	typedef short ChannelNumber;
+
+	const ChannelNumber NO_CHANNEL = -1;
+	
+	enum NativeProtocol
+	{
+		VENDOR_PROTOCOL
+	};
+	
+	enum ContentType
+	{
+		AUDIO,
+		AV
+	};
+	
+	enum DeviceConnectionDropReason
+	{
+		DEV_CON_DROPPED_BY_NON_HAVI_REQUEST,
+		IEC_BROADCASTOUT_RESTORE_FAILURE,
+		IEC_BROADCAST_BROKEN
+	};
+	
+	typedef ushort ErrorCode;
+	const ErrorCode SUCCESS = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+	const ErrorCode ACCESS_VIOLATION = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED = 0x0004;
+	const ErrorCode RESERVED = 0x0005;
+	const ErrorCode INVALID_PARAMETER = 0x0006;
+	const ErrorCode RESOURCE_LIMIT = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT = 0x000a;
+	const ErrorCode LOCAL = 0x000b;
+	const ErrorCode STANDBY = 0x000c;
+	
+	const ErrorCode NO_PROT = 0x0080;
+	const ErrorCode NO_ADDR = 0x0081;
+	const ErrorCode NOT_SUPPORTED = 0x0082;
+	const ErrorCode NOT_POSS = 0x0083;
+	const ErrorCode NOT_SET = 0x0084;
+	const ErrorCode NO_CONT = 0x0085;
+	const ErrorCode COMMANDS = 0x0086;
+	const ErrorCode CONNECTIONS = 0x0087;
+	const ErrorCode NONE = 0x0088;
+	const ErrorCode SCHED_OVERLAP = 0x0089;
+	const ErrorCode NOT_RUN = 0x008a;
+	const ErrorCode NO_COMMAND = 0x008b;
+	const ErrorCode SINK_FCM = 0x008c;
+	const ErrorCode SINK_PLUG = 0x008d;
+	const ErrorCode NO_CONNECTION = 0x008e;
+	const ErrorCode INSUFF_BANDWIDTH = 0x008f;
+	const ErrorCode INSUFF_CHANNEL = 0x0090;
+	const ErrorCode DEV_BUSY = 0x0091;
+	const ErrorCode NO_ATTACH = 0x0092;
+	
+	
+	
+	enum OperationId
+	{
+        GET_DEVICE_ICON,
+        GET_HUID,
+        GET_FCM_COUNT,
+        GET_FCM_SEID_LIST,
+        GET_DEVICE_CLASS,
+        GET_DEVICE_MANUFACTURER,
+        GET_USER_PREFERRED_NAME,
+        SET_USER_PREFERRED_NAME,
+        GET_POWER_STATE,
+        SET_POWER_STATE,
+        NATIVE_COMMAND,
+        GET_CONTROL_CAPABILITY,
+        GET_HAVLET_CODE_UNIT_PROFILE,
+        GET_HAVLET_CODE_UNIT,
+        GET_PLUG_COUNT,
+        GET_PLUG_STATUS,
+        CONNECT,
+        DISCONNECT,
+        GET_CONNECTION_LIST,
+        GET_CHANNEL_USAGE,
+        GET_PLUG_USAGE,
+        SET_IEC_BANDWIDTH_ALLOCATION,
+        IEC_SPRAY_OUT,
+        IEC_TAP_IN,
+        GET_SUPPORTED_TRANSMISSION_FORMATS,
+        GET_TRANSMISSION_FORMAT,
+        SET_TRANSMISSION_FORMAT,
+        GET_CONTENT_ICON_LIST,
+        SELECT_CONTENT,
+        STOP_CONTENT,
+        SCHEDULE_RESERVATION,
+        UNSCHEDULE_RESERVATION,
+        GET_SCHEDULED_ACTION_REFERENCES,
+        ADD_VIRTUAL_FCM,
+        REMOVE_VIRTUAL_FCM,
+        GET_AVAILABLE_STREAM_TYPES,
+        GET_STREAM_TYPE,
+        SET_STREAM_TYPE_ID
+	};
+	
+	enum TargetType
+	{
+		DCM_61883,
+		DCM_NON61883,
+		FCM_61883,
+		FCM_NON61883,
+		AM
+	};
+	
+	enum FCAssigner
+	{
+		NONE,
+		AVC,
+		CAL,
+		VENDOR,
+		DCM
+	};
+	
+	
+	struct DeviceIcon
+	{
+		Label deviceIconName;
+		OptAttrList	optionals;
+	};
+	
+	struct ContentIcon
+	{
+		Label contentIconName;
+		boolean	availability;
+		OptAttrList	optionals;
+	};
+	
+	struct ContentIconRef
+	{
+		uint handle;
+		ContentIcon	icon;
+	};
+	
+	struct TargetId
+	{
+		TargetType type;
+		GUID guid;
+		unsigned long n1;
+		unsigned short n2;
+	};
+	
+	struct HUID
+	{
+		TargetId targetId;
+		InterfaceId interfaceId;
+		VendorId vendorId;
+		boolean nlUniqueness;
+		FCAssigner n2Assigner;
+	};
+	
+	struct ControlCapability
+	{
+		boolean extControl;
+		boolean notifies;
+	};
+	
+	struct DcmHavletCodeUnitProfile
+	{
+	    Version version;
+		long transferSize;
+		long codeSpace;
+		long workingSpace;
+		long chunkSize;
+	};
+	
+	struct DcmPlugCount
+	{
+		ushort inCount;
+		ushort outCount;
+	};
+	
+	struct DcmConnectionList
+	{
+		sequence<DeviceConnection> list;
+		sequence<boolean> preemptable;
+	};
+	
+	interface Dcm
+	{
+		DeviceIcon getDeviceIcon();
+		HUID getHuid();
+		ushort getFcmCount();
+		sequence<SEID> getFcmSeidList();
+		DeviceClass getDeviceClass();
+		wstring getDeviceManufacturer();
+		wstring getUserPreferredName();
+		void setUserPreferredName(in wstring name);
+		boolean getPowerState();
+		boolean setPowerState(in boolean powerState);
+		ByteRow nativeCommand(in NativeProtocol protocol, in ByteRow command);
+		ControlCapability getControlCapability();
+		DcmHavletCodeUnitProfile getHavletCodeUnitProfile();
+		sequence<octet> getHavletCodeUnit(in long firstByte, in long lastByte);
+		DcmPlugCount getPlugCount(in TransportType type);
+		PlugStatus getPlugStatus(in Plug plug);
+		void connect(in SEID caller, in Plug src, in Plug dest); // StreamManager
+		void disconnect(in SEID caller, in Plug src, in Plug dest); // StreamManager
+		DcmConnectionList getConnectionList(in Plug plug);
+		short getChannelIUsage(in IecPlug plug);
+		sequence<IecPlug> getPlugUsage(in ushort channel);
+		void setIecBandwidthAllocation(in SEID caller, in IecPlug plug, in uint maxBandwidth);
+		void iecSprayOut(in SEID caller, in IecPlug plug, in ushort channel, in ushort playload);
+		void iecTapIn(in SEID caller, in IecPlug plug, in ushort isocChannel);
+		sequence<TransmissionFormat> getSupportedTransmissionFormats(in StreamType type, in Plug plug);
+		TransmissionFormat getTransmissionFormat(in Plug plug);
+		void getTransmissionFormat(in SEID caller, in Plug plug, in TransmissionFormat format); // StreamManager
+		sequence<ContentIconRef> getContentIconList(in ContentType type);
+		void selectContent(in ContentType contentType, in uint handle, in boolean dynamicBw, in FcmPlug sink);
+		void stopContent(in ContentType contentType, in uint handle);
+//		void scheduleReservation(in sequence<Command> startCommandsList, in sequence<Command> stopCommandsList,	in sequence<SAConnection> connectionList, in DateTime startTime, in DateTime stopTime, in SAPeriod periodicity, in sequence<HUID> involvedFcmList, in wstring<50> userInfo, in long index);
+//		void unscheduleReservation(in long index); // ResourceManager
+//		sequence<SAReference> getScheduledActionReferences();
+		HUID addVirtualFcm();
+		void removeVirtualFcm();
+		sequence<StreamType> getAvailableStreamTypes(in Plug DcmPlug, in Plug FcmPlug);
+		StreamType getStreamType(in Plug DcmPlug);
+		void setStreamTypeId(in SEID caller, in Plug DcmPlug, in StreamTypeId typeId); //StreamManager
+	};
+	
+    interface SystemEvent
+    {
+    	void userPreferredNameChanged(in wstring name);
+		void powerStateChanged(in boolean powerState);
+		void powerFailureImminent();
+		void deviceConnectionAdded(in Plug src, in Plug dest);
+		void deviceConnectionDropped(in Plug src, in Plug dest, in DeviceConnectionDropReason reason);
+		void deviceConnectionChanged(in Plug plug, in InternalPlug oldPlug, in InternalPlug newPlug, in StreamType newSType, in TransmissionFormat newTFormat);
+		void transmissionFormatChanged(in Plug plug, in TransmissionFormat format);
+		void bandwidthRequirementChanged(in IecPlug plug, in boolean allocated);
+		void contentListChanged(in ContentType type);
+		void streamTypeChanged(in Plug srcDcmPlug, in StreamType type);
+	};
+};

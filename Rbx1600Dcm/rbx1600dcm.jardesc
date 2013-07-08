@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+    <jar path="/home/stephen/workspace/nfs-target/opt/streetfire/rbx1600dcm.jar"/>
+    <options overwrite="true" compress="true" exportErrors="true" exportWarnings="true" saveDescription="true" descriptionLocation="/Rbx1600Dcm/rbx1600dcm.jardesc" useSourceFolders="false" buildIfNeeded="true"/>
+    <manifest manifestVersion="1.0" usesManifest="true" reuseManifest="true" saveManifest="true" generateManifest="false" manifestLocation="/Rbx1600Dcm/rbx1600dcm.manifest">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportOutputFolder="false" exportJavaFiles="false">
+        <javaElement handleIdentifier="=Rbx1600Dcm/RMI"/>
+        <javaElement handleIdentifier="=Rbx1600Dcm/src&lt;com.redrocketcomputing.havi.iav.rbx1600.fcm.jukebox.protocol"/>
+        <javaElement handleIdentifier="=Rbx1600Dcm/src&lt;com.redrocketcomputing.havi.iav.rbx1600.dcm"/>
+        <javaElement handleIdentifier="=Rbx1600Dcm/src&lt;com.redrocketcomputing.havi.iav.rbx1600.fcm.jukebox"/>
+        <javaElement handleIdentifier="=Rbx1600Dcm/src&lt;com.redrocketcomputing.havi.constants"/>
+        <folder path="/Rbx1600Dcm/configuration"/>
+        <javaElement handleIdentifier="=Rbx1600Dcm/src&lt;com.redrocketcomputing.havi.iav.rbx1600.fcm.amplifier"/>
+    </selectedElements>
+</jardesc>

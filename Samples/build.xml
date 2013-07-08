@@ -1,0 +1,99 @@
+<project name="Samples" default="dist" basedir=".">
+  <description>
+    Samples  build file
+  </description>
+
+  <!-- tweak classpath if a dev build -->
+  <condition property="classpath" value="../Util/bin:../MediaOrb/bin:../Rbx1600/bin:../Rbx1600Dcm/bin:../MediaManagerAm/bin">
+    <isset property="dev"/>
+  </condition>
+
+  <!-- default classpath looks in lib dirs -->
+  <property name="classpath"                value="./lib/util.jar:./lib/mediaorb.jar:./lib/rbx1600.jar:./lib/rbx1600dcm.jar:./lib/mediamanageram.jar"/>
+
+  <!-- path properties -->
+  <property name="src" location="src"/>
+  <property name="bin" location="bin"/>
+  <property name="dist" location="dist"/>
+
+  <!-- compiler settings -->
+  <property name="debug" value="on"/>
+  <property name="target" value="1.3"/>
+
+  <!-- default value for tag (placed in jar manifest) -->
+  <property name="rbx1600.tag" value="DEVELOPMENT"/>
+
+
+  <!-- initialize build -->
+  <target name="init">
+
+    <!-- create the time stamp -->
+    <tstamp/>
+
+    <!-- create the build directory structure used by compile -->
+    <mkdir dir="${bin}"/>
+  </target>
+
+
+  <!-- compile the samples -->
+  <target name="compile" depends="init" description="compile samples">
+    <!-- compile the java code from ${src} into ${bin} -->
+    <javac srcdir="${src}" destdir="${bin}" classpath="${classpath}"/>
+  </target>
+
+
+  <!-- assemble the distribution (wraps the make jar with a dependency for automated build) -->
+  <target name="dist" depends="compile">
+    <antcall target="makejar"/>
+    <antcall target="makesrcjar"/>
+  </target>
+
+
+  <!-- assemble the distribution jar, assumes classes built -->
+  <target name="makejar" depends="init">
+    <!-- create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
+
+    <!-- create the samples jar -->
+    <jar jarfile="${dist}/lib/samples.jar" >
+
+      <!-- include manifest with version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${samples.tag}"/>
+      </manifest>
+
+      <!-- include generated and non-generated RMI classes -->
+      <fileset dir="${bin}"/>
+    </jar>
+  </target>
+
+
+  <!-- assemble the sourcedistribution jar -->
+  <target name="makesrcjar" depends="init">
+    <!-- create the distribution directory -->
+    <mkdir dir="${dist}/src"/>
+
+    <!-- create the client library jar -->
+    <jar jarfile="${dist}/src/samples-src.jar" >
+
+      <!-- include manifest with version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${samples.tag}"/>
+      </manifest>
+
+      <!-- include src dir -->
+      <fileset dir="${src}"/>
+    </jar>
+  </target>
+
+  <!-- clean up -->
+  <target name="clean" description="clean up">
+    <delete dir="${bin}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+</project>

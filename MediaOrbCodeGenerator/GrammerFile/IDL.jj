@@ -1,0 +1,1587 @@
+PARSER_BEGIN(IDLParser)
+
+package parser;
+import java.util.*;
+import java.io.*;
+
+
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import testEnv.driver;
+
+import Type.AddType;
+import Type.AndType;
+import Type.AnyType;
+import Type.ArrayType;
+import Type.BooleanType;
+import Type.CharType;
+import Type.ConstType;
+import Type.ContextListType;
+import Type.ContextType;
+import Type.DeclarationType;
+import Type.DoubleType;
+import Type.EnumType;
+import Type.ExceptionType;
+import Type.FloatType;
+import Type.ForwardDeclarationType;
+import Type.FunctionType;
+import Type.HaviType;
+import Type.HolderType;
+import Type.InType;
+import Type.InterfaceHeaderType;
+import Type.InterfaceType;
+import Type.LiteralType;
+import Type.LongLongType;
+import Type.LongType;
+import Type.ModuleType;
+import Type.MultType;
+import Type.OctetType;
+import Type.OrType;
+import Type.RaiseListType;
+import Type.SequenceType;
+import Type.ShiftType;
+import Type.ShortType;
+import Type.StringType;
+import Type.StructType;
+import Type.SwitchType;
+import Type.TypedefType;
+import Type.ULongLongType;
+import Type.ULongType;
+import Type.UShortType;
+import Type.UnaryType;
+import Type.UnionStructType;
+import Type.UnionType;
+import Type.VoidType;
+import Type.WCharType;
+import Type.WStringType;
+import Type.XorType;
+
+
+public class IDLParser {
+
+
+//   static ArrayList moduleList = new ArrayList();
+//   static HashMap dataTypeList = new HashMap();
+//   static HashMap constList = new HashMap();
+
+   static String tempUnionName = "";
+
+   static ArrayList moduleList = driver.moduleList;
+   static HashMap dataTypeList = driver.dataTypeList;
+   static HashMap constList = driver.constList;
+
+
+	  private static HaviType getPragmaType(String type)
+	  {
+			try
+			{
+        Class newClass = Class.forName("Type."+type);
+
+        Class[] parameter = new Class[0];
+
+        Object[] parameterList = new Object[0];
+
+        Constructor constructor = newClass.getConstructor(parameter);
+
+				HaviType haviType = (HaviType)constructor.newInstance(parameterList);
+				
+        return haviType;
+			}
+			catch(Exception e)
+			{
+				return new LiteralType();
+			}
+				
+ 	
+	  }
+
+/*
+  public static ArrayList getModuleList()
+  {
+      return moduleList;
+  }
+
+  public static HashMap getDataTypeList()
+  {
+      return dataTypeList;
+  }
+
+
+  public static HashMap getConstList()
+  {
+  	return constList;
+  }
+*/
+
+
+  public static void main(String args[]) {
+    IDLParser parser;
+    if (args.length == 0) {
+      System.out.println("StreetFire IDLParser Version 1.0: Reading from standard input . . .");
+      parser = new IDLParser(System.in);
+    } else if (args.length == 1) {
+      System.out.println("StreetFire IDLParser Version 1.0: Reading from file " + args[0] + " . . .");
+      try {
+        parser = new IDLParser(new java.io.FileInputStream(args[0]));
+      } catch (java.io.FileNotFoundException e) {
+        System.out.println("StreetFire IDLParser Version 1.0: File " + args[0] + " not found.");
+        return;
+      }
+    } else {
+      System.out.println("Usage is one of:");
+      System.out.println("         java IDLParser < inputfile");
+      System.out.println("OR");
+      System.out.println("         java IDLParser inputfile");
+      return;
+    }
+    try {
+      parser.specification();
+      System.out.println("StreetFire IDLParser Version 1.0: Java program parsed successfully.");
+    } catch (ParseException e) {
+      System.out.println("StreetFire IDLParser Version 1.0: Encountered errors during parse.");
+    }
+  }
+
+}
+
+PARSER_END(IDLParser)
+
+
+/*
+ * Tokens to ignore in the BNF follow.
+ */
+
+SKIP :
+{
+  < " " >
+| < "\t" >
+| < "\n" >
+| < "//" (~["\n"])* "\n" >
+| <"/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/">
+| < "#" ([" ","\t"])* (["0"-"9"])+
+    (([" ","\t"])* "\"" (~["\""])+ "\""
+           ([" ","\t"])* (["0"-"9"])* ([" ","\t"])* (["0"-"9"])*)? "\n" >
+}
+
+/* Production 1 Every document is a ContextType, it contains a list of ConstructType*/
+
+HaviType specification() :
+{
+	ContextType ct = new ContextType();
+	HaviType ctype;
+}
+{
+  ( ctype = definition()   { ct.addChild(ctype); }   )+ { return ct;}
+}
+
+/* Production 2 */
+
+HaviType definition() :
+{
+	HaviType dataType = null;
+}
+{
+  dataType= type_dcl() ";"	{ return dataType; }
+|
+  dataType = const_dcl() ";"	{ return dataType; }
+|
+  dataType=except_dcl() ";"	{ return dataType; }
+|
+  dataType=interfacex() ";"	{ return dataType; }
+|
+  dataType = module() ";"	{ return dataType; }
+
+}
+
+/* Production 3 */
+
+HaviType module() :
+{
+	ModuleType mt = new ModuleType();
+	HaviType temp;
+}
+{
+  "module" temp= identifier()
+  {
+  	//mt.addChild(temp);
+	mt.setTypeName(   ((LiteralType)temp).getTypeName() );
+   }
+  "{"
+   (temp =definition() { mt.addChild(temp); } )+
+   "}"
+   {
+   	moduleList.add(  mt.getTypeName().toLowerCase()   );
+   	return mt;
+   }
+}
+
+/* Production 4 */
+
+HaviType interfacex() :
+{
+	HaviType dataType;
+}
+{
+  LOOKAHEAD(3)
+  dataType=interface_dcl()	{ return dataType;}
+|
+  dataType= forward_dcl()	{ return dataType; }
+}
+
+/* Production 5 */
+
+HaviType interface_dcl() :
+{
+	InterfaceType it = new InterfaceType();
+	InterfaceHeaderType header;
+	ArrayList list = null;
+}
+{
+
+
+  header=interface_header() { it.setInterfaceHeaderType(header); }
+  "{"
+  list=interface_body()
+  "}"
+  {
+	it.setChildList(list);
+  	return it;
+  }
+}
+
+/* Production 6 */
+
+HaviType forward_dcl() :
+{
+	HaviType forwardName;
+}
+{
+  "interface" forwardName = identifier()
+  {
+  	ForwardDeclarationType ft = new ForwardDeclarationType();
+	ft.addChild(forwardName);
+	return ft;
+  }
+
+}
+
+/* Production 7 */
+
+InterfaceHeaderType interface_header() :
+{
+	HaviType identifier;
+	ArrayList list = null;
+}
+
+{
+  "interface" identifier=identifier() [ list=inheritance_spec() ]
+  {
+  	InterfaceHeaderType iht = new InterfaceHeaderType();
+	iht.setTypeName(identifier.getTypeName());
+
+	iht.setChildList(list);
+	return iht;
+  }
+
+}
+
+/* Production 8 */
+
+ArrayList interface_body() :
+{
+	ArrayList list = new ArrayList();
+	HaviType dataType;
+}
+{
+  ( dataType=export()	{ list.add(dataType); })*
+  {return list;}
+}
+
+/* Production 9 */
+
+HaviType export() :
+{
+	HaviType dataType;
+}
+{
+  dataType=type_dcl() ";"	{ return dataType; }
+|
+  dataType=const_dcl() ";"	{ return dataType; }
+|
+  dataType=except_dcl() ";"	{ return dataType; }
+|
+  dataType=attr_dcl() ";"	{ return dataType; }
+|
+  dataType=op_dcl() ";"		{ return dataType; }
+}
+
+/* Production 10 */
+
+ArrayList inheritance_spec() :
+{
+	ArrayList list = new ArrayList();
+	HaviType sname;
+
+	String temp=new String();
+}
+{
+  ":" sname=scoped_name()  { list.add(sname); } ( ","  sname=scoped_name()  { list.add(sname); })*
+
+
+  { return list; }
+
+}
+
+
+
+/* Production 11 */
+
+HaviType scoped_name() :
+{
+
+	HaviType scopeName;
+	String pragmaType;
+	
+	String temp = new String();
+
+}
+{
+  [ "::" ] scopeName=identifier() { pragmaType = scopeName.getTypeName(); temp = scopeName.getTypeName(); } ( "::" scopeName=identifier() { temp = scopeName.getTypeName(); })*
+  {
+	HaviType htype = getPragmaType(pragmaType);
+	htype.setTypeName(temp);
+	return htype;
+//  	return new LiteralType(temp);
+  }
+}
+
+
+/* Production 12 */
+
+HaviType const_dcl() :
+{
+
+	ConstType ct = new ConstType();
+	HaviType temp;
+	String typeName;
+
+}
+{
+  "const" temp=const_type()
+  {
+  	typeName = temp.getTypeName();
+	ct.setDataType(temp);
+  }
+
+  temp=identifier()  { ct.setTypeName(temp.getTypeName());  }
+
+  "=" temp=const_exp() { ct.setValue(temp.getTypeName()); }
+  {
+
+      ArrayList al = (ArrayList) constList.get(typeName);
+      if(al == null)
+      {
+        al = new ArrayList();
+        constList.put(typeName, al);
+      }
+      al.add(ct);
+      return ct;
+  }
+
+}
+
+
+
+
+/* Production 13 */
+
+HaviType const_type() :
+{
+	HaviType dataType;
+}
+{
+  dataType=integer_type()	{ return dataType; }
+|
+  dataType=char_type()		{ return dataType; }
+|
+  dataType=boolean_type()	{ return dataType; }
+|
+  dataType=floating_pt_type()	{ return dataType; }
+|
+  dataType=string_type()	{ return dataType; }
+|
+  dataType= scoped_name()	{ return dataType; }
+|
+  dataType=octet_type()		{ return dataType; }	//added by George
+
+}
+
+/* Production 14 */
+
+HaviType const_exp() :
+{
+	HaviType temp;
+}
+{
+
+    temp=unary_expr()	{ return temp; }
+
+}
+
+/* Production 15 */
+
+HaviType or_expr() :
+{
+	OrType lt = new OrType();
+	HaviType temp;
+}
+{
+  temp=xor_expr() { lt.addChild(temp); }
+
+  ( "|" temp= xor_expr(){ lt.addChild(temp); })*
+  { return lt; }
+
+}
+
+/* Production 16 */
+
+HaviType xor_expr() :
+{
+	XorType lt = new XorType();
+	HaviType temp;
+}
+{
+  temp=and_expr() { lt.addChild(temp); }
+  ( "^" temp=and_expr() { lt.addChild(temp); })*
+  { return lt; }
+}
+
+/* Production 17 */
+
+HaviType and_expr() :
+{
+	AndType lt = new AndType();
+	HaviType temp;
+}
+{
+  temp=shift_expr()	{ lt.addChild(temp); }
+  ( "&" temp=shift_expr()  {lt.addChild(temp);})*
+  { return lt; }
+}
+
+/* Production 18 */
+
+HaviType shift_expr() :
+{
+	ShiftType lt = new ShiftType();
+	HaviType temp;
+
+}
+{
+  temp = addChild_expr() { lt.addChild(temp); }
+  ( ( ">>" {lt.addChild(new LiteralType(">>"));}| "<<" {lt.addChild(new LiteralType("<<"));})  temp=addChild_expr()    { lt.addChild(temp); })*
+  { return lt; }
+}
+
+/* Production 19 */
+
+HaviType addChild_expr() :
+{
+	AddType lt = new AddType();
+	HaviType temp;
+
+}
+{
+  temp=mult_expr() { lt.addChild(temp); }
+  ( ( "+" {lt.addChild(new LiteralType("+"));} | "-" {lt.addChild(new LiteralType("-"));} )   temp= mult_expr()  { lt.addChild(temp); })*
+  { return lt; }
+}
+
+/* Production 20 */
+
+HaviType mult_expr() :
+{
+	MultType lt = new MultType();
+	HaviType temp;
+
+}
+{
+  temp=unary_expr()	{lt.addChild(temp);}
+  ( ( "*" {lt.addChild(new LiteralType("*"));} | "/" {lt.addChild(new LiteralType("/"));} | "%" {lt.addChild(new LiteralType("%"));})  temp=unary_expr() { lt.addChild(temp); })*
+  { return lt; }
+}
+
+/* Production 21 */
+
+HaviType unary_expr() :
+{
+
+	UnaryType ut = new UnaryType();
+	HaviType temp;
+
+	String tempStr = new String();
+
+}
+{
+  //[ temp=unary_operator() { ut.addChild(temp); }]  temp= primary_expr() { ut.addChild(temp); return ut; }
+  [ temp=unary_operator() { tempStr += temp.getTypeName(); } ]  temp= primary_expr() { tempStr += temp.getTypeName(); return new LiteralType(tempStr); }
+
+}
+
+/* Production 22 */
+HaviType unary_operator() :
+{}
+{
+  "-"	{ return new LiteralType("-"); }
+|
+  "+"	{ return new LiteralType("+"); }
+|
+  "~"	{ return new LiteralType("~"); }
+}
+
+/* Production 23 */
+
+HaviType primary_expr() :
+{
+	HaviType dataType;
+}
+{
+  dataType=scoped_name()	{ return dataType; }
+|
+  dataType=literal()		{ return dataType; }
+|
+  "(" dataType=const_exp() ")" { return dataType; }
+}
+
+/* Production 24 */
+
+HaviType literal() :
+{
+	HaviType literal;
+}
+{
+  literal=integer_literal()	{ return literal; }
+|
+  literal=string_literal()	{ return literal; }
+|
+  literal=character_literal()	{ return literal; }
+|
+  literal=floating_pt_literal()	{ return literal; }
+|
+  literal=boolean_literal()	{ return literal; }
+}
+
+/* Production 25 */
+
+HaviType boolean_literal() :
+{}
+{
+  "TRUE"	{ return new LiteralType("TRUE"); }
+|
+  "FALSE"	{ return new LiteralType("FALSE"); }
+}
+
+/* Production 26 */
+
+HaviType positive_int_const() :
+{
+	HaviType value;
+}
+{
+  value=const_exp()	{ return value; }
+}
+
+/* Production 27 */
+
+HaviType type_dcl() :
+{
+	HaviType dataType;
+}
+{
+  "typedef" dataType=type_declarator()
+  {
+	TypedefType tt = new TypedefType();
+	tt.addChild(dataType);
+	return tt;
+
+  }
+|
+  dataType=struct_type()	{ return dataType; }
+|
+  dataType=union_type()		{ return dataType; }
+|
+  dataType=enum_type()		{ return dataType; }
+}
+
+/* Production 28 */
+
+HaviType type_declarator() :
+{
+
+	HaviType spec;
+	ArrayList decl;
+}
+{
+  spec=type_spec() decl=declarators()
+  {
+
+  	HaviType hType = spec;
+	HaviType finalType = hType;
+
+	while(hType != null)
+	{
+		finalType = hType;
+                
+        if(finalType instanceof StructType || finalType instanceof UnionType || finalType instanceof EnumType)
+                  break;
+		
+		hType = (HaviType)dataTypeList.get(hType.getTypeName());
+	}
+
+
+	//temporary change - instead of throw parseexcpetion, system out.
+//	if(finalType instanceof LiteralType)
+//		System.out.println();	
+	//	throw new ParseException("typedef - Scope name not found:" + finalType.getTypeName());
+//	else
+//	{
+                Iterator iter = decl.iterator();
+                while(iter.hasNext())
+                {
+                        HaviType type =  (HaviType) iter.next();
+                        String name = type.getTypeName();
+                        if(finalType instanceof SequenceType ||  type instanceof ArrayType)
+                        {
+                          StructType temp = new StructType();
+                          temp.setTypeName(name);
+                          finalType = temp;
+                        }
+                        dataTypeList.put(   name, finalType);
+                }
+
+//	}
+
+	DeclarationType dt = new DeclarationType();
+	dt.setDataType(spec);
+        dt.setTypeName(spec.getTypeName());
+	dt.setChildList(decl);
+
+	return dt;
+  }
+}
+
+/* Production 29 */
+
+HaviType type_spec() :
+{
+	HaviType dataType;
+}
+{
+  dataType=simple_type_spec()	{ return dataType; }
+|
+  dataType=constr_type_spec()	{ return dataType; }
+}
+
+/* Production 30 */
+
+HaviType simple_type_spec() :
+{
+	HaviType dataType;
+}
+{
+  dataType=base_type_spec()	{ return dataType; }
+|
+  dataType=template_type_spec()	{ return dataType; }
+|
+  dataType=scoped_name()	{ return dataType; }
+}
+
+/* Production 31 */
+
+HaviType base_type_spec() :
+{
+	HaviType dataType;
+}
+{
+  dataType=floating_pt_type()	{ return dataType; }
+|
+  dataType=integer_type()	{ return dataType; }
+|
+  dataType=char_type()		{ return dataType; }
+|
+  dataType=boolean_type()	{ return dataType; }
+|
+  dataType=octet_type()		{ return dataType; }
+|
+  dataType=any_type()		{ return dataType; }
+}
+
+/* Production 32 */
+
+HaviType template_type_spec() :
+{
+	HaviType dataType;
+}
+{
+  dataType=sequence_type()	{ return dataType; }
+|
+  dataType=string_type()	{ return dataType; }
+}
+
+/* Production 33 */
+
+HaviType constr_type_spec() :
+{
+	HaviType dataType;
+}
+{
+  dataType=struct_type()	{ return dataType; }
+|
+  dataType=union_type()		{ return dataType; }
+|
+  dataType=enum_type()		{ return dataType; }
+}
+
+/* Production 34 */
+
+ArrayList declarators() :
+{
+	ArrayList list = new ArrayList();
+	HaviType temp;
+}
+{
+  temp=declarator() { list.add(temp); }   ( "," temp=declarator() { list.add(temp); })*
+  { return list;}
+}
+
+/* Production 35 */
+
+HaviType declarator() :
+{
+	HaviType dataType;
+}
+{
+  LOOKAHEAD(2)
+  dataType=complex_declarator()		{ return dataType; }
+|
+  dataType=simple_declarator()		{ return dataType; }
+}
+
+/* Production 36 */
+
+HaviType simple_declarator() :
+{
+	HaviType temp;
+}
+{
+  temp=identifier()	{ return temp; }
+}
+
+/* Production 37 */
+
+HaviType complex_declarator() :
+{
+	HaviType dataType;
+}
+{
+  dataType=array_declarator()	{ return dataType; }
+}
+
+/* Production 38 */
+
+HaviType floating_pt_type() :
+{}
+{
+  "float"	{ return new FloatType(); }
+|
+  "double"	{ return new DoubleType(); }
+}
+
+/* Production 39 */
+
+HaviType integer_type() :
+{
+	HaviType dataType;
+}
+{
+  dataType=signed_int()	{ return dataType; }
+|
+  dataType=unsigned_int() { return dataType; }
+}
+
+/* Production 40 */
+
+HaviType signed_int() :
+{
+	HaviType dataType;
+}
+{
+  dataType = signed_long_int()	{ return dataType; }
+|
+  dataType = signed_short_int() { return dataType; }
+}
+
+/* Production 41 */
+
+HaviType signed_long_int() :
+{
+	String value;
+}
+{
+/* modified by George. - 11-19-03.  addChild [ "long" ] so that it can handle long long type */
+  "long" {value = "long";}
+  [ "long"
+     {value += " long";}
+  ]
+  {
+  	if(value.equals("long long"))
+		return new LongLongType();
+	else
+		return new LongType();
+  }
+
+}
+
+/* Production 42 */
+
+HaviType signed_short_int() :
+{}
+{
+  "short"	{ return new ShortType(); }
+}
+
+/* Production 43 */
+
+HaviType unsigned_int() :
+{
+	HaviType dataType;
+}
+{
+  LOOKAHEAD(2)
+  dataType=unsigned_long_int()	{ return dataType; }
+|
+  dataType=unsigned_short_int()	{ return dataType; }
+}
+
+/* Production 44 */
+
+HaviType unsigned_long_int() :
+{
+	String name;
+}
+{
+/* modified by George. - 11-19-03.  addChild [ "long" ] so that it can handle long long type */
+  "unsigned" "long" { name = "long"; }	[ "long" { name +=" long";} ]
+
+  {
+  	if(name.equals("long long"))
+	    return new ULongLongType();
+	else
+	    return new ULongType();
+  }
+
+}
+
+/* Production 45 */
+
+HaviType unsigned_short_int() :
+{}
+{
+  "unsigned" "short"	{ return new UShortType(); }
+}
+
+/* Production 46 */
+
+HaviType char_type() :
+{}
+{
+  "char"	{ return new CharType(); }
+  | "wchar"	{ return new WCharType(); }
+}
+
+/* Production 47 */
+
+HaviType boolean_type() :
+{}
+{
+  "boolean"	{ return new BooleanType(); }
+}
+
+/* Production 48 */
+
+HaviType octet_type() :
+{}
+{
+  "octet"	{ return new OctetType(); }
+}
+
+/* Production 49 */
+
+HaviType any_type() :
+{}
+{
+  "any"	{ return new AnyType(); }
+}
+
+/* Production 50 */
+
+HaviType struct_type() :
+{
+	ArrayList list;
+	HaviType structName;
+	StructType st = new StructType();
+}
+{
+  "struct" structName=identifier()
+  {
+
+	st.setTypeName(   ((LiteralType)structName).getTypeName() );
+	dataTypeList.put(  st.getTypeName() , st);
+  }
+  "{" list=member_list()
+   {
+	st.setChildList(list);
+   }
+
+   "}"
+  {
+
+	return st;
+  }
+
+}
+
+/* Production 51 */
+
+ArrayList member_list() :
+{
+	ArrayList list = new ArrayList();
+	HaviType temp;
+}
+{
+  ( temp = member() {list.add(temp); })+
+  { return list; }
+
+}
+
+/* Production 52 */
+
+HaviType member() :
+{
+	HaviType temp;
+	HaviType spec;
+	ArrayList decl;
+}
+{
+  	spec=type_spec() decl=declarators() ";"
+	{
+		String typeName = spec.getTypeName();
+
+		temp = spec;
+
+		if(spec  instanceof LiteralType)
+		{
+			spec = (HaviType) dataTypeList.get(spec.getTypeName());
+
+			if(spec == null)
+				spec = temp;
+				//throw new ParseException("struct - Scope name not found:" + typeName);
+
+		}
+
+		DeclarationType dt = new DeclarationType();
+		dt.setDataType(spec);
+		dt.setTypeName(spec.getTypeName());
+		dt.setChildList(decl);
+		return dt;
+	}
+}
+
+/* Production 53 */
+
+HaviType union_type() :
+{
+	UnionType ut = new UnionType();
+	HaviType temp;
+
+	ArrayList switchList;
+}
+{
+  "union" temp=identifier()
+  {
+  	tempUnionName = temp.getTypeName();
+  	dataTypeList.put(temp.getTypeName(), ut);
+  	ut.setTypeName(temp.getTypeName());
+  }
+
+
+  "switch" "("
+  temp=switch_type_spec()
+  {
+  	String typeName = temp.getTypeName();
+
+
+	//temporary change - instead of throw parseexception, reassign temp with temptype
+	if(temp instanceof LiteralType)
+	{
+		HaviType temptype = temp;
+		temp = (HaviType) dataTypeList.get(typeName);
+		if(temp == null)
+			temp = temptype;
+//			throw new ParseException("union  scoped name not found:" + typeName);
+	}
+
+  	ut.setDataType(temp);
+  }
+
+  ")" "{" switchList=switch_body() "}"
+
+
+  {
+	ut.setChildList(switchList);
+	tempUnionName="";
+	return ut;
+  }
+
+}
+
+/* Production 54 */
+
+HaviType switch_type_spec() :
+{
+	HaviType dataType;
+}
+{
+  dataType=integer_type()	{ return dataType; }
+|
+  dataType=char_type()		{ return dataType; }
+|
+  dataType=boolean_type()	{ return dataType; }
+|
+  dataType=enum_type()		{ return dataType; }
+|
+  dataType=scoped_name()	{ return dataType; }
+}
+
+/* Production 55 */
+
+ArrayList switch_body() :
+{
+	ArrayList list = new ArrayList();
+	HaviType dataType;
+}
+{
+  ( dataType=casex() { list.add(dataType); })+
+
+  { return list; }
+
+}
+
+/* Production 56 */
+
+HaviType casex() :
+{
+	HaviType element;
+	SwitchType st = new SwitchType();
+	String temp;
+	int count = 0;
+
+}
+{
+  ( temp= case_label())+
+  (element=element_spec() ";"
+
+  	{
+		 st.addChild(element);
+		 if(count++ > 1)
+		 {
+		 	System.err.println("Warning! Not fully compatible with IDL standard");
+		}
+
+	}
+
+  )+	//not really compatible with idl standard
+  {
+
+  	st.setLabel(temp);
+
+	UnionStructType structType = new UnionStructType();
+	structType.setTypeName(temp.substring(0,1)+temp.substring(1).toLowerCase()+tempUnionName);
+	dataTypeList.put(structType.getTypeName(), structType);
+
+
+  	return st;
+
+  }
+}
+
+/* Production 57 */
+
+String case_label() :
+{
+	HaviType temp;
+}
+{
+  "case" temp= const_exp() ":"	{ return temp.getTypeName(); }
+|
+  "default" ":"	{ return "default"; }
+}
+
+/* Production 58 */
+
+HaviType element_spec() :
+{
+	DeclarationType dt = new DeclarationType();
+	HaviType temp;
+}
+{
+
+  temp=type_spec()
+  {
+	String typeName = temp.getTypeName();
+
+
+//temporary changed - instead of throw parseException, reassign temp with temptype
+	if(temp instanceof LiteralType)
+	{
+		HaviType temptype = temp;
+		temp = (HaviType) dataTypeList.get(typeName);
+		if(temp == null)
+			temp = temptype;
+//			throw new ParseException("switch type scoped name not found:" + typeName);
+	}
+
+	dt.setDataType(temp);
+        dt.setTypeName(temp.getTypeName());
+  }
+  temp=declarator()
+  {
+  	dt.addChild(temp);
+  }
+  {
+	return dt;
+  }
+}
+
+
+
+
+/* Production 59 */
+
+HaviType enum_type() :
+{
+	EnumType eType = new EnumType();
+	HaviType temp;
+
+}
+{
+  "enum" temp=identifier()
+  {
+	eType.setTypeName(((LiteralType)temp).getTypeName() );
+
+  }
+  "{" temp=enumerator()
+   {
+	eType.addChild(temp);
+   }
+
+  ( "," temp=enumerator()
+   {
+	eType.addChild(temp);
+   })*
+
+   "}"
+   {
+   	dataTypeList.put(eType.getTypeName(), eType);
+
+	return eType;
+   }
+}
+
+/* Production 60 */
+
+HaviType enumerator() :
+{
+	HaviType vName;
+}
+{
+  vName=identifier()	{ return vName; }
+}
+
+/* Production 61 */
+
+HaviType sequence_type() :
+{
+	SequenceType st = new SequenceType();
+	HaviType temp;
+	st.setValue("0");
+}
+{
+  "sequence" "<" temp=simple_type_spec()
+  {
+  	String typeName = temp.getTypeName();
+
+
+//temporary change - instead of throw parseexception, reassign temp with temptype;
+  	if(temp instanceof LiteralType)
+	{
+		HaviType temptype = temp;
+		temp = (HaviType) dataTypeList.get(typeName);
+
+		if(temp == null)
+			temp = temptype;
+//			throw new ParseException("sequence scoped name not found:" + typeName);
+		
+	}
+
+	st.setDataType(temp);
+
+  }
+
+
+  [ "," temp=positive_int_const() {st.setValue(temp.getTypeName());}  ] ">"
+  {
+	return st;
+  }
+
+
+}
+
+/* Production 62  Modified by George on 11-20-03  addChild one more data type "wstring"  */
+
+HaviType string_type() :
+{
+	HaviType value = null;
+}
+{
+  "string" [ "<" value=positive_int_const() ">" ]
+  {
+  	StringType st = new StringType();
+	if(value != null)
+		st.setTypeName(value.getTypeName());
+	return st;
+  }
+  | "wstring" [ "<" value=positive_int_const() ">" ]
+  {
+  	WStringType wst = new WStringType();
+	//if(value != null)
+		//wst.addChild(value);
+	return wst;
+  }
+}
+
+/* Production 63 */
+
+HaviType array_declarator() :
+{
+	ArrayType at = new ArrayType();
+	HaviType temp;
+}
+{
+  temp=identifier()
+  {
+  	at.setTypeName(temp.getTypeName());
+  }
+  ( temp=fixed_array_size() { at.addChild(temp); })+
+  {
+	return at;
+  }
+}
+
+
+/* Production 64 */
+
+HaviType fixed_array_size() :
+{
+	HaviType value;
+}
+{
+  "[" value=positive_int_const() "]"	{ return value;}
+}
+
+/* Production 65 */
+
+HaviType attr_dcl() :
+{
+	DeclarationType dt = new DeclarationType();
+	HaviType temp;
+
+}
+{
+  [ "readonly" ] "attribute"
+  temp = param_type_spec()
+  { 
+  	dt.setDataType(temp);
+        dt.setTypeName(temp.getTypeName());
+
+  }
+  temp=simple_declarator() {dt.addChild(temp);}  ( "," temp=simple_declarator() {dt.addChild(temp);} )*
+  {
+    return dt;
+  }
+}
+
+/* Production 66 */
+
+HaviType except_dcl() :
+{
+
+	ExceptionType et = new ExceptionType();
+	HaviType temp;
+
+}
+{
+  "exception" temp=identifier() { et.setTypeName(temp.getTypeName()); }
+
+  "{" ( temp=member() { et.addChild(temp); })* "}"
+  {
+
+	return et;
+  }
+
+}
+
+/* Production 67 */
+
+HaviType op_dcl() :
+{
+	FunctionType ft = new FunctionType();
+
+	HaviType temp;
+
+	ArrayList list = null;
+	RaiseListType raiseList = null;
+	ContextListType contextList = null;
+}
+{
+  [ op_attribute() ] temp=op_type_spec()  { ft.setReturnType(temp); }
+
+  temp=identifier() { ft.setTypeName(temp.getTypeName()); }
+
+  list=parameter_dcls() [ raiseList=raises_expr() ] [ contextList=context_expr() ]
+  {
+
+        ft.setChildList(list);
+
+        ft.setRaiseListType(raiseList);
+
+        ft.setContextListType(contextList);
+
+	return ft;
+   }
+}
+
+/* Production 68 */
+
+void op_attribute() :
+{}
+{
+  "oneway"
+}
+
+/* Production 69 */
+
+HaviType op_type_spec() :
+{
+	HaviType dataType;
+}
+{
+  dataType= param_type_spec()	{ return dataType; }
+|
+  "void"			{ return new VoidType(); }
+}
+
+/* Production 70 */
+
+ArrayList parameter_dcls() :
+{
+	ArrayList list = new ArrayList();
+	HaviType temp;
+}
+{
+  "(" [ temp=param_dcl() {list.add(temp); }    ( "," temp=param_dcl()  {list.add(temp);} )* ] ")"
+
+  { return list; }
+}
+
+/* Production 71 */
+
+HaviType param_dcl() :
+{
+	HolderType ht = new HolderType();
+	HaviType temp;
+
+}
+{
+  temp=param_attribute()  { ht.setAttribute(temp); }
+  temp=param_type_spec()  { ht.setDataType(temp); }
+  temp=simple_declarator() { ht.setTypeName(temp.getTypeName()); }
+  {
+	return ht;
+  }
+}
+
+
+
+
+/* Production 72 */
+
+HaviType param_attribute() :
+{}
+{
+  "in"		{ return new InType(); }
+|
+  "out"		
+  { 
+  	throw new ParseException("Out paramater is not allow");
+	//return new OutType();
+  }
+|
+  "inout"
+  {
+  	throw new ParseException("InOut paramater is not allow");
+	//return new InOutType();
+  }
+}
+
+/* Production 73 */
+
+RaiseListType raises_expr() :
+{
+	RaiseListType list = new RaiseListType();
+	HaviType sname;
+}
+{
+  "raises" "(" sname=scoped_name() { list.addChild(sname); }   ( "," sname=scoped_name() { list.addChild(sname); } )* ")"
+  { return list; }
+}
+
+/* Production 74 */
+
+ContextListType context_expr() :
+{
+	ContextListType list = new ContextListType();
+	HaviType stringName;
+}
+{
+  "context" "(" stringName=string_literal() {list.addChild(stringName); }    ( "," stringName=string_literal() { list.addChild(stringName); } )* ")"
+   { return list; }
+}
+
+/* Production 75 */
+
+HaviType param_type_spec() :
+{
+	HaviType dataType;
+	HaviType tempType;
+
+}
+{
+  dataType=base_type_spec()	{ return dataType; }
+|
+  dataType=template_type_spec()	{ return dataType; }
+|
+  dataType=scoped_name()
+  {
+         tempType = dataType;
+	 String typeName = dataType.getTypeName();
+  	 dataType = (HaviType) dataTypeList.get(dataType.getTypeName());
+
+	 if(dataType == null)
+	 	dataType = tempType;
+
+
+	 return dataType;
+  }
+}
+
+/* Definitions of complex regular expressions follow */
+
+HaviType identifier() :
+{
+	Token token;
+}
+{
+  token = <ID>  { return new LiteralType(token.toString()) ; }
+}
+
+HaviType integer_literal() :
+{
+	Token token;
+}
+{
+  token=<OCTALINT>	{ return new LiteralType(token.toString()); }
+|
+  token=<DECIMALINT>	{ return new LiteralType(token.toString()); }
+|
+  token=<HEXADECIMALINT> { return new LiteralType(token.toString()); }
+}
+
+HaviType string_literal() :
+{
+	Token token;
+}
+{
+  token=<STRING>	{ return new LiteralType(token.toString()); }
+}
+
+HaviType character_literal() :
+{
+	Token token;
+}
+{
+  token=<CHARACTER>	{ return new LiteralType(token.toString()); }
+}
+
+HaviType floating_pt_literal() :
+{
+	Token token;
+}
+{
+  token=<FLOATONE>	{ return new LiteralType(token.toString()); }
+|
+  token=<FLOATTWO>	{ return new LiteralType(token.toString()); }
+}
+
+TOKEN :
+{
+  <  ID : ["a"-"z","A"-"Z", "_"] (["a"-"z","A"-"Z","0"-"9","_"])* >
+| <  OCTALINT : "0" (["0"-"7"])* (["u","U","l","L"])? >
+| <  DECIMALINT : ["1"-"9"] (["0"-"9"])* (["u","U","l","L"])? >
+| <  HEXADECIMALINT : ("0x"|"0X") (["0"-"9","a"-"f","A"-"F"])+ (["u","U","l","L"])? >
+| <  FLOATONE : ((["0"-"9"])+ "." (["0"-"9"])* | (["0"-"9"])* "." (["0"-"9"])+)
+   (["e","E"] (["-","+"])? (["0"-"9"])+)? (["f","F","l","L"])? >
+| <  FLOATTWO : (["0"-"9"])+ ["e","E"] (["-","+"])?
+   (["0"-"9"])+ (["f","F","l","L"])? >
+| <  CHARACTER : "'"
+   (   (~["'","\\","\n","\r"])
+   | ("\\" (
+             ["n","t","v","b","r","f","a","\\","?","'","\""]
+            |
+             "0" (["0"-"7"])*
+            |
+             ["1"-"9"] (["0"-"9"])*
+            |
+             ("0x" | "0X") (["0"-"9","a"-"f","A"-"F"])+
+           )
+     )
+   )
+   "'" >
+| <  STRING : "\""
+   ( ( ~["\"","\\","\n","\r"])
+   | ("\\" (
+             ["n","t","v","b","r","f","a","\\","?","'","\""]
+            |
+             "0" (["0"-"7"])*
+            |
+             ["1"-"9"] (["0"-"9"])*
+            |
+             ("0x" | "0X") (["0"-"9","a"-"f","A"-"F"])+
+           )
+     )
+   )*
+   "\"" >
+}

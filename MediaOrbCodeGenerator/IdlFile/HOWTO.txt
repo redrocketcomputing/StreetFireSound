@@ -1,0 +1,54 @@
+specical case for enum:
+1. ErrorCode
+2. OperationId
+3. SystemEventConstant - sequence must match interface SystemEvent.
+
+
+special case for interface:
+1. SystemEvent.
+2. MessageCallBack
+when specify the above name, codegen will activate special code to handle it.
+
+
+
+union case:
+	the union itself becomes a abstract class and each case will create a concrete class
+	that inherit from union abstract class.
+
+
+
+typedef of sequence or array will create a class (according to the Havi specification)
+
+
+special object:
+1. SEID
+2. GUID
+3. HUID
+4. TargetId
+5. VendorId
+
+
+
+
+In each module, the item in "enum systemevent" must match the enum item in the module havi (global) and 
+the item order must match its "interface systemevent"
+
+
+When module contains client call back function, we create a interface call messagecallback that contains all the callback function name and function signature
+
+
+In each interface, out and inout are invalid parameter, if interface contains one out, we modify the inteface and make it as return value. However, if interface
+contains more than one out, we modified the whole function. We create a struct and put all the out parameter in it. Then let the new struct becomes the
+interface's return value.
+
+
+
+
+when a systemevent create in a module
+1. must contains systemevent interface
+2. must contains systemeventconstant enum
+3. must add a systemeventconstant to the systemeventtype in havi module
+
+
+
+when a new module added, a new apicode should be add to havi module

@@ -1,0 +1,347 @@
+# File:  TEST_Companion_top.ucf
+# Date:   3-5-04
+#
+# Author: R. Bauer
+# User Constraint File for TEST_Companion_top.vhd (top level module)
+# For StreetRacer CPU Card to Application Board Interface
+#
+# 3-6-04: temporarily removed CLK_3_6MHz to preserve a global clock buf
+# 3-4-04: Restored RAMS,BRAMS constraints for FIFO Support
+# 3-2-04: RELAXED CLOCK BACK TO 17ns
+# 2-12-04: Changed names for SL_TX_k,SL_RX_k 
+# 2-24-04: REduced clock from 17 to 15ns margin
+# 2-26-04: Reduced clock constraint from 15 to 10ns
+#
+# Target Devices:
+# Xilinx Spartan IIE, FT256 Package (XC2S50E, XC2S100E, XC2S150E, XC2S200E, XC2S300E, XC2S400E)
+CONFIG PART = XC2S400E-FT256-6 ;
+#
+CONFIG KEEP_HIERARCHY=TRUE;
+#
+#TIMING:
+# 
+NET "XS_SDCLK0" PERIOD = 10 ns; 
+NET "XS_SDCLK0" TNM_NET = "XS_SDCLK0"; 
+NET "CLK_I" PERIOD = 15 ns;
+NET "CLK_I" TNM_NET = "CLK_I";
+#TIMEGRP "CLK_I_LOGIC" = "PADS" "FFS" "RAMS" "BRAMS_PORTA" "BRAMS_PORTB" "LATCHES";
+TIMEGRP "CLK_I_LOGIC" = "PADS" "FFS" "LATCHES";
+TIMESPEC "TS_CLK_I" = FROM "CLK_I" TO "CLK_I_LOGIC" 15 ns;
+#--------------------------------------------------------------------------------------
+# Global constraints:
+# 
+TIMESPEC "TS_ffs_BRAMS_PORTA" = FROM "FFS" TO "BRAMS_PORTA" 15 ns; 
+TIMESPEC "TS_BRAMS_PORTA_ffs" = FROM "BRAMS_PORTA" TO "FFS" 15 ns; 
+#
+# BRAMS_PORTB is not used in XAPP175-based fifos => comment out for build
+# TIMESPEC "TS_ffs_BRAMS_PORTB" = FROM "FFS" TO "BRAMS_PORTB" 15 ns; 
+# TIMESPEC "TS_BRAMS_PORTB_ffs" = FROM "BRAMS_PORTB" TO "FFS" 15 ns; 
+#
+TIMESPEC "TS_ffs_RAMS" = FROM "FFS" TO "RAMS" 15 ns; 
+TIMESPEC "TS_RAMS_ffs" = FROM "RAMS" TO "FFS" 15 ns; 
+#
+TIMESPEC "TS_ffs_ffs" = FROM "FFS" TO "FFS" 15 ns; 
+TIMESPEC "TS_ffs_pads" = FROM "FFS" TO "PADS" 15 ns; 
+TIMESPEC "TS_pads_ffs" = FROM "PADS" TO "FFS" 15 ns; 
+TIMESPEC "TS_P2P" = FROM "PADS" TO "PADS" 15 ns; 
+#--------------------------------------------------------------------------------------
+#
+################################################################################
+################################################################################
+#
+#  CONFIGURATION OPTIONS FOR DIFFERENT TEST/APP BOARDS:
+#
+#  ONLY ONE OF THE THREE CONFIGURATIONS SHOULD BE USED
+#  OTHERS SHOULD BE COMMENTED OUT
+# $CONFIG$
+################################################################################
+# TEST BOARD (UNMODIFIED)
+#
+# ETHERNET BYTE ENABLES ARE NOT USED
+# PIN T3 is E1_IOWAIT
+# PIN M2 is E1_CS
+# PIN R4 is E1_INT
+# PIN P1 is E1_IO16
+#
+#NET "E1_IOWAIT" LOC = "T3" ; #Test Board Control
+#NET "E1_CS" LOC = "M2" ; #Test Board Control
+#NET "E1_INT" LOC = "R4" ; #Test Board Control
+#NET "E1_IO16" LOC = "P1" ; #Test Board Control
+#
+################################################################################
+# TEST BOARD MODIFIED FOR ETHERNET BYTE LANE CONTROL
+#
+# PIN T3 IS ETH_BE<0>  Ethernet BE0 (R23) --> (R6) EB140 (FPGA-T3) (was E1_IOWAIT)
+# PIN M2 IS ETH_BE<1>  Ethernet BE1 (R24) --> (R7) EB129 (FPGA-M2) (was E1_CS)
+# PIN R4 IS ETH_BE<2>  Ethernet BE2 (R25) --> (R8) EB139 (FPGA-R4) (was E1_INT)
+# PIN P1 IS ETH_BE<3>  Ethernet BE3 (R26) --> (R9) EB136 (FPGA-P1) (was E1_IO16)
+#
+NET "ETH_BE<0>" LOC = "T3" ; # SMSC LAN91C111 BYTE ENABLE 
+NET "ETH_BE<1>" LOC = "M2" ; # SMSC LAN91C111 BYTE ENABLE 
+NET "ETH_BE<2>" LOC = "R4" ; # SMSC LAN91C111 BYTE ENABLE 
+NET "ETH_BE<3>" LOC = "P1" ; # SMSC LAN91C111 BYTE ENABLE 
+#
+################################################################################
+# NEW APPLICATION BOARD FOR RBX1600
+#
+# PIN T3 IS ETH_BE<0>  Ethernet BE0 (R23) --> (R6) EB140 (FPGA-T3) (was E1_IOWAIT)
+# PIN M2 IS ETH_BE<1>  Ethernet BE1 (R24) --> (R7) EB129 (FPGA-M2) (was E1_CS)
+# PIN R4 IS ETH_BE<2>  Ethernet BE2 (R25) --> (R8) EB139 (FPGA-R4) (was E1_INT)
+# PIN P1 IS ETH_BE<3>  Ethernet BE3 (R26) --> (R9) EB136 (FPGA-P1) (was E1_IO16)
+#
+# NET "ETH_BE<0>" LOC = "T3" ; # SMSC LAN91C111 BYTE ENABLE 
+# NET "ETH_BE<1>" LOC = "M2" ; # SMSC LAN91C111 BYTE ENABLE 
+# NET "ETH_BE<2>" LOC = "R4" ; # SMSC LAN91C111 BYTE ENABLE 
+# NET "ETH_BE<3>" LOC = "P1" ; # SMSC LAN91C111 BYTE ENABLE 
+#
+################################################################################
+#
+################################################################################
+# I/O Assignment
+################################################################################
+#
+#
+# Pre-assigned FPGA IO
+#
+# FPGA Clock Inputs
+#
+NET "XS_SDCLK0" LOC = "B8" ; #GCK2
+# 3-6-04 NET "CLK_3_6MHz" LOC = "T9" ;  #GCK0
+NET "EB_GCK1_147" LOC = "T8 "; # GCK1  
+NET "EB_GCK3_13" LOC = "C8 "; # GCK3  
+#
+# FPGA Config Pins
+#
+NET "XS_DREQ1" LOC = "L16" ;
+NET "XS_DREQ0" LOC = "L13" ;
+NET "XS_CS5n" LOC = "J14" ;
+NET "XS_CS4n" LOC = "G15" ;
+NET "XS_CS3n" LOC = "F14" ;
+NET "XS_CS2n" LOC = "E15" ;
+NET "XS_CS1n" LOC = "B16" ;
+NET "XS_SDATA_IN1" LOC = "A14" ;
+NET "XS_SYNC" LOC = "C15" ;
+NET "XS_SDATA_OUT" LOC = "A13" ;
+NET "xs_SDATA_IN0" LOC = "P15" ;
+NET "xs_BITCLK" LOC = "P16" ; 
+#
+# 
+#
+# X-Scale IO Bus Signals
+#
+NET "xs_ma<0>" LOC = "N7" ;
+NET "xs_ma<1>" LOC = "P7" ;
+NET "xs_ma<10>" LOC = "P9" ;
+NET "xs_ma<11>" LOC = "T10" ;
+NET "xs_ma<12>" LOC = "R10" ;
+NET "xs_ma<13>" LOC = "P10" ;
+NET "xs_ma<14>" LOC = "R11" ;
+NET "xs_ma<15>" LOC = "T11" ;
+NET "xs_ma<16>" LOC = "N10" ;
+NET "xs_ma<17>" LOC = "M10" ;
+NET "xs_ma<18>" LOC = "P11" ;
+NET "xs_ma<19>" LOC = "B10" ;
+NET "xs_ma<2>" LOC = "R7" ;
+NET "xs_ma<20>" LOC = "D12" ;
+NET "xs_ma<21>" LOC = "C9" ;
+NET "xs_ma<22>" LOC = "A10" ;
+NET "xs_ma<3>" LOC = "T7" ;
+NET "xs_ma<4>" LOC = "M7" ;
+NET "xs_ma<5>" LOC = "N8" ;
+NET "xs_ma<6>" LOC = "P8" ;
+NET "xs_ma<7>" LOC = "R8" ;
+NET "xs_ma<8>" LOC = "A8" ;
+NET "xs_ma<9>" LOC = "R9" ;
+NET "xs_md<0>" LOC = "E10" ;
+NET "xs_md<1>" LOC = "H15" ;
+NET "xs_md<10>" LOC = "D11" ;
+NET "xs_md<11>" LOC = "E11" ;
+NET "xs_md<12>" LOC = "B11" ;
+NET "xs_md<13>" LOC = "C11" ;
+NET "xs_md<14>" LOC = "D10" ;
+NET "xs_md<15>" LOC = "A11" ;
+NET "xs_md<16>" LOC = "J15" ;
+NET "xs_md<17>" LOC = "K16" ;
+NET "xs_md<18>" LOC = "J13" ;
+NET "xs_md<19>" LOC = "K12" ;
+NET "xs_md<2>" LOC = "G14" ;
+NET "xs_md<20>" LOC = "L14" ;
+NET "xs_md<21>" LOC = "K14" ;
+NET "xs_md<22>" LOC = "L12" ;
+NET "xs_md<23>" LOC = "L15" ;
+NET "xs_md<24>" LOC = "K15" ;
+NET "xs_md<25>" LOC = "H16" ;
+NET "xs_md<26>" LOC = "C10" ;
+NET "xs_md<27>" LOC = "D9" ;
+NET "xs_md<28>" LOC = "K13" ;
+NET "xs_md<29>" LOC = "J16" ;
+NET "xs_md<3>" LOC = "F16" ;
+NET "xs_md<30>" LOC = "G16" ;
+NET "xs_md<31>" LOC = "H14" ;
+NET "xs_md<4>" LOC = "H13" ;
+NET "xs_md<5>" LOC = "D16" ;
+NET "xs_md<6>" LOC = "F13" ;
+NET "xs_md<7>" LOC = "E16" ;
+NET "xs_md<8>" LOC = "G13" ;
+NET "xs_md<9>" LOC = "F15" ;
+NET "xs_npwe" LOC = "A12" ;
+NET "xs_noe" LOC = "E14" ;
+NET "xs_rdnwr" LOC = "A9" ;
+NET "xs_rdy" LOC = "B9" ;  # also gpio 18
+NET "xs_sdcke0" LOC = "R13" ;
+NET "xs_dqm<0>" LOC = "C16" ;
+NET "xs_dqm<1>" LOC = "P13" ;
+NET "xs_dqm<2>" LOC = "T12" ;
+NET "xs_dqm<3>" LOC = "N16" ;
+#
+# Other XSCALE Signals
+NET "xs_pwm0" LOC = "F12" ;  # FPGA Interrupt Output to CPU GPIO 16 
+NET "xs_pwm1" LOC = "T13" ;  # FPGA Reset Input from CPU GPIO 17
+#
+NET "xs_nacreset" LOC = "N9" ; # non gpio xscale signal for AC97 
+NET "xs_niois16" LOC = "R12" ; # gpio 57/pcmcia/cf
+NET "xs_npce1" LOC = "D15" ;   # gpio 52/pcmcia/cf
+NET "xs_npce2" LOC = "T14" ;   # gpio 53/pcmcia/cf
+NET "xs_npior" LOC = "C12" ;   # gpio 50/pcmcia/cf
+NET "xs_npiow" LOC = "R14" ;   # gpio 51/pcmcia/cf
+NET "xs_npoe" LOC = "P12" ;    # gpio 48/pcmcia/cf
+NET "xs_npreg" LOC = "N15" ;   # gpio 55/pcmcia/cf
+NET "xs_npsktsel" LOC = "M16" ;# gpio 54/pcmcia/cf
+NET "xs_npwait" LOC = "G12" ;  # gpio 56/pcmcia/cf
+#
+#####################################################################
+# 
+# FPGA IO connected to both edge bus and cpu (11 signals)
+# 
+# Note that either 
+# 1.  The cpu signals must be tristated (see xscale 
+# documentation for gpio tristate control) when using these
+# as FPGA to Edge Bus Signals 
+# OR
+# 2.  The fpga outputs must be tristated (or defined as inputs) 
+# when these signals are used as direct mapped peripheral functions.
+#
+#
+# (if needed for edge bus io, these assignments can be commented
+#  out - put a # in front - to allow automatic pinout of these signals)
+#
+#
+# The Following Signal Names Correspond to Test Board Signal Names
+#
+#NET "sl_tx_6" LOC = "M13" ; #Triple Connection: CPU/FPGA/EDGE:XS_FF_DCD
+NET "sl6_tx" LOC = "M13" ; #Triple Connection: CPU/FPGA/EDGE:XS_FF_DCD
+NET "sl5_tx" LOC = "N14" ; #Triple Connection: CPU/FPGA/EDGE:XS_FF_RI
+NET "sl4_tx" LOC = "M11" ; #Triple Connection: CPU/FPGA/EDGE:XS_SSP_TXD
+NET "sl6_rx" LOC = "M15" ; #Triple Connection: CPU/FPGA/EDGE:XS_FF_DTR
+NET "sl5_rx" LOC = "B12" ; #Triple Connection: CPU/FPGA/EDGE:XS_FF_DSR
+NET "sl4_rx" LOC = "M14" ; #Triple Connection: CPU/FPGA/EDGE:XS_SSPEXTCLK
+NET "FF_CTS" LOC = "E13" ; #Triple Connection: CPU/FPGA/EDGE:XS_FF_CTS
+NET "IR_TX" LOC = "N11" ; #Triple Connection: CPU/FPGA/EDGE:XS_SSP_RXD
+NET "IR_RX" LOC = "N12" ; #Triple Connection: CPU/FPGA/EDGE:XS_SSP_SFRM
+NET "FF_RTS" LOC = "D14" ; #Triple Connection: CPU/FPGA/EDGE:XS_FF_RTS
+NET "LED_4" LOC = "B13" ; #Triple Connection: CPU/FPGA/EDGE:XS_SSP_SCLK
+#
+# The following signal names (commented out) correspond to the same 11 signals above
+# but with the XSCALE signal name
+#
+#NET "xs_sspextclk" LOC = "M14" ; # gpio 27/ssp
+#NET "xs_ssprxd" LOC = "N11" ;    # gpio 26/ssp
+#NET "xs_sspsclk" LOC = "B13" ;   # gpio 23/ssp
+#NET "xs_sspsfrm" LOC = "N12" ;   # gpio 24/ssp
+#NET "xs_ssptxd" LOC = "M11" ;    # gpio 25/ssp
+#NET "xs_ffdcd" LOC = "M13" ;     # gpio 36/ffuart
+#NET "xs_ffdsr" LOC = "B12" ;     # gpio 37/ffuart
+#NET "xs_ffdtr" LOC = "M15" ;     # gpio 40/ffuart
+#NET "xs_ffri" LOC = "N14" ;      # gpio 38/ffuart
+#NET "xs_ff_rts" LOC = "D14";     # gpio 41/ffuart
+#NET "xs_ff_cts" LOC = "E13";     # gpio 35/ffuart
+#
+#
+#####################################################################
+#
+# Edge Bus Only Signals:
+# 
+# Edge Bus Signal Names that correspond to Test Board:
+#
+#
+NET "ADDR<1>" LOC = "D8" ; #Test Board Address Bus
+NET "ADDR<2>" LOC = "D7" ; #Test Board Address Bus
+NET "ADDR<3>" LOC = "B7" ; #Test Board Address Bus
+NET "ADDR<4>" LOC = "C6" ; #Test Board Address Bus
+NET "ADDR<5>" LOC = "B5" ; #Test Board Address Bus
+NET "ADDR<6>" LOC = "A6" ; #Test Board Address Bus
+NET "ADDR<7>" LOC = "E6" ; #Test Board Address Bus
+NET "ADDR<8>" LOC = "C5" ; #Test Board Address Bus
+NET "ADDR<9>" LOC = "C4" ; #Test Board Address Bus
+NET "ADDR<10>" LOC = "H3" ; #Test Board Address Bus
+NET "ADDR<11>" LOC = "J3" ; #Test Board Address Bus
+NET "ADDR<12>" LOC = "A3" ; #Test Board Address Bus
+NET "ADDR<13>" LOC = "D3" ; #Test Board Address Bus
+NET "ADDR<14>" LOC = "C1" ; #Test Board Address Bus
+NET "ADDR<15>" LOC = "D1" ; #Test Board Address Bus
+NET "DATA<0>" LOC = "E7" ; #Test Baord Data Bus
+NET "DATA<1>" LOC = "C7" ; #Test Baord Data Bus
+NET "DATA<2>" LOC = "B6" ; #Test Baord Data Bus
+NET "DATA<3>" LOC = "A5" ; #Test Baord Data Bus
+NET "DATA<4>" LOC = "A7" ; #Test Baord Data Bus
+NET "DATA<5>" LOC = "D6" ; #Test Baord Data Bus
+NET "DATA<6>" LOC = "D5" ; #Test Baord Data Bus
+NET "DATA<7>" LOC = "B4" ; #Test Baord Data Bus
+NET "DATA<8>" LOC = "G2" ; #Test Baord Data Bus
+NET "DATA<9>" LOC = "A4" ; #Test Baord Data Bus
+NET "DATA<10>" LOC = "B3" ; #Test Baord Data Bus
+NET "DATA<11>" LOC = "C2" ; #Test Baord Data Bus
+NET "DATA<12>" LOC = "D2" ; #Test Baord Data Bus
+NET "DATA<13>" LOC = "K1" ; #Test Baord Data Bus
+NET "DATA<14>" LOC = "E3" ; #Test Baord Data Bus
+NET "DATA<15>" LOC = "E2" ; #Test Baord Data Bus
+NET "DATA<16>" LOC = "F4" ; #Test Baord Data Bus
+NET "DATA<17>" LOC = "F2" ; #Test Baord Data Bus
+NET "DATA<18>" LOC = "K2" ; #Test Baord Data Bus
+NET "DATA<19>" LOC = "H1" ; #Test Baord Data Bus
+NET "DATA<20>" LOC = "H4" ; #Test Baord Data Bus
+NET "DATA<21>" LOC = "L2" ; #Test Baord Data Bus
+NET "DATA<22>" LOC = "J1" ; #Test Baord Data Bus
+NET "DATA<23>" LOC = "K3" ; #Test Baord Data Bus
+NET "DATA<24>" LOC = "G5" ; #Test Baord Data Bus
+NET "DATA<25>" LOC = "G4" ; #Test Baord Data Bus
+NET "DATA<26>" LOC = "L3" ; #Test Baord Data Bus
+NET "DATA<27>" LOC = "M1" ; #Test Baord Data Bus
+NET "DATA<28>" LOC = "N1" ; #Test Baord Data Bus
+NET "DATA<29>" LOC = "L5" ; #Test Baord Data Bus
+NET "DATA<30>" LOC = "M4" ; #Test Baord Data Bus
+NET "DATA<31>" LOC = "N3" ; #Test Baord Data Bus
+NET "E0_ADS" LOC = "F3" ; #Test Board Control
+NET "E0_CS" LOC = "G1" ; #Test Board Control
+NET "E0_CYCLE" LOC = "H2" ; #Test Board Control
+NET "E0_DATACS" LOC = "J2" ; #Test Board Control
+NET "E0_INT" LOC = "K5" ; #Test Board Control
+NET "E0_IOWAIT" LOC = "F5" ; #Test Board Control
+NET "E0_LCLK" LOC = "F1" ; #Test Board Control
+NET "E0_LDEV" LOC = "G3" ; #Test Board Control
+NET "E0_RD" LOC = "E4" ; #Test Board Control
+NET "E0_RDYRTN" LOC = "K4" ; #Test Board Control
+NET "E0_W_RN" LOC = "J4" ; #Test Board Control
+NET "E0_WR" LOC = "E1" ; #Test Board Control
+# NET "E1_CS" LOC = "M2" ; #Test Board Control
+# NET "E1_INT" LOC = "R4" ; #Test Board Control
+# NET "E1_IO16" LOC = "P1" ; #Test Board Control
+NET "E1_IO32" LOC = "N2" ; #Test Board Control
+NET "E1_IOR" LOC = "L1" ; #Test Board Control
+NET "E1_IOW" LOC = "L4" ; #Test Board Control
+# NET "E1_IOWAIT" LOC = "T3" ; #Test Board Control
+NET "E1_RESET" LOC = "M3" ; #Test Board Control
+NET "I2S_LRCLK" LOC = "T5" ; #Test Board Control
+NET "I2S_MCLK" LOC = "N5" ; #Test Board Control
+NET "I2S_SCLK" LOC = "R6" ; #Test Board Control
+NET "I2S_SDATA" LOC = "N6" ; #Test Board Control
+NET "sl0_rx" LOC = "P4" ; #Test Board Control
+NET "sl1_rx" LOC = "P5" ; #Test Board Control
+NET "sl2_rx" LOC = "P6" ; #Test Board Control
+NET "sl3_rx" LOC = "M6" ; #Test Board Control
+NET "sl0_tx" LOC = "P2" ; #Test Board Control
+NET "sl1_tx" LOC = "T4" ; #Test Board Control
+NET "sl2_tx" LOC = "R5" ; #Test Board Control
+NET "sl3_tx" LOC = "T6" ; #Test Board Control
+#
+######################################################################

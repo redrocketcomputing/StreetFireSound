@@ -1,0 +1,168 @@
+module AvDisc
+{
+	typedef unsigned long AvDiscPlayMode;
+	const AvDiscPlayMode NORMAL = 0x00000000;
+	const AvDiscPlayMode DIRECT_1 = 0x00000001;
+	const AvDiscPlayMode DIRECT = 0x00000002;
+	const AvDiscPlayMode REPEAT_1 = 0x00000003;
+	const AvDiscPlayMode REPEAT = 0x00000004;
+	const AvDiscPlayMode SHUFFLE = 0x00000005;
+	const AvDiscPlayMode RANDOM = 0x00000006;
+
+	typedef unsigned long AvDiscRecordMode;
+	const AvDiscRecordMode NORMAL = 0x00000000;
+	const AvDiscRecordMode NEW = 0x00000001;
+	const AvDiscRecordMode OVERWRITE = 0x00000002;
+	const AvDiscRecordMode OVERWRITE_AND_JUMP = 0x00000003;
+
+	typedef unsigned long AvDiscTransportMode;
+	const AvDiscTransportMode PLAY = 0x00000000;
+	const AvDiscTransportMode RECORD = 0x00000001;
+	const AvDiscTransportMode VARIABLE_FORWARD = 0x00000002;
+	const AvDiscTransportMode VARIABLE_REVERSE = 0x00000003;
+	const AvDiscTransportMode STOP = 0x00000004;
+	const AvDiscTransportMode PAUSE = 0x00000005;
+	const AvDiscTransportMode SKIP = 0x00000006;
+	const AvDiscTransportMode NO_MEDIA = 0x00000007;
+	
+	typedef unsigned long AvDiscCapability;
+	const AvDiscCapability VARIABLE_FORWARD = 0x00000000;
+	const AvDiscCapability VARIABLE_REVERSE = 0x00000001;
+	const AvDiscCapability SKIP = 0x00000002;
+	const AvDiscCapability REC_PAUSE = 0x00000003;
+	const AvDiscCapability RECORD = 0x00000004;
+	const AvDiscCapability GET_ITEM_LIST = 0x00000005;
+	const AvDiscCapability PUT_ITEM_LIST = 0x00000006;
+	const AvDiscCapability ERASE = 0x00000007;
+	const AvDiscCapability MULTI_SLOT = 0x00000008;
+
+	const FcmAttributeIndicator CURRENT_STATE = 0x0001;
+
+	struct ItemIndex
+	{
+		ushort	list;
+		ushort	index;
+		wstring	title;
+		wstring	artist;
+		wstring	genre;
+		wstring	contentType;
+		TimeCode playbackTime;
+		ulong contentSize;
+		DateTime initialTimeStamp;
+		DateTime lastUpdateTimeStamp;
+	};
+	
+	struct AvDiscTransportState
+	{
+		uint state;
+		uint mode;
+	};
+
+	struct AvDiscCounterValue
+	{
+		ushort list;
+		ushort index;
+		TimeCode relative;
+		TimeCode absolute;
+	};
+
+	struct AvDiscCurrentState
+	{
+		AvDiscTransportState transportState;
+		Direction dir;
+		ushort plugNum;
+	};
+
+	struct AvDiscFormat
+	{
+		MediaFormatId format;
+		WriteProtectStatus writeStatus;
+	};
+
+	struct AvDiscCapabilities
+	{
+	  sequence<boolean> capabilityList;
+	  sequence<MediaFormatId> playFormats;
+	  sequence<MediaFormatId> recordFormats;
+	  unsigned long capacity;
+	};
+
+	typedef ushort ErrorCode;
+	const ErrorCode SUCCESS                  = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE          = 0x0001;
+	const ErrorCode ACCESS_VIOLATION         = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE     = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED          = 0x0004;
+	const ErrorCode RESERVED                 = 0x0005;
+	const ErrorCode INVALID_PARAMETER        = 0x0006;
+	const ErrorCode RESOURCE_LIMIT           = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT     = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE       = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT        = 0x000a;
+	const ErrorCode LOCAL                    = 0x000b;
+	const ErrorCode STANDBY                  = 0x000c;
+	
+	const ErrorCode NOT_SUPPORTED            = 0x0080;
+	const ErrorCode EMPTY_DISC               = 0x0081;
+	const ErrorCode NO_DISC                  = 0x0082;
+	const ErrorCode SHORT_CAPACITY           = 0x0083;
+	const ErrorCode READ_ERR                 = 0x0084;
+	const ErrorCode WRITE_ERR                = 0x0085;
+	const ErrorCode WRITE_PROTECTED          = 0x0086;
+	const ErrorCode DISC_FULL                = 0x0087;             
+	const ErrorCode TRACK_FULL               = 0x0088;
+	const ErrorCode TOC_EDIT_BUSY            = 0x0089;
+	const ErrorCode LOCKED                   = 0x008a;
+	const ErrorCode NO_CONNECTION            = 0x008b;
+	const ErrorCode TRANSITION_NOT_AVAILABLE = 0x008c;
+	const ErrorCode ABORTED                  = 0x008d;
+
+	enum OperationId
+	{
+		GET_ITEM_LIST,
+		PLAY,
+		RECORD,
+		VARIABLE_FORWARD,
+		VARIABLE_REVERSE,
+		STOP,
+		RESUME,
+		PAUSE,
+		SKIP,
+		INSERT_MEDIA,
+		EJECT_MEDIA,
+		GET_STATE,
+		GET_FORMAT,
+		GET_POSITION,
+		ERASE,
+		PUT_ITEM_LIST,
+		GET_CAPABILITY
+	};
+
+	interface AvDisc
+	{
+		sequence<ItemIndex> getItemList(in ushort listNumber);
+		void play(in AvDiscPlayMode playMode, in ushort plugNum, in ushort listNumber, in ushort indexNumber);
+		void record(in AvDiscRecordMode recordMode, in ushort plugNum, in ushort listNumber, in ushort indexNumber, in TimeCode recordingTime, in uint64 recordingSize);
+		void variableForward(in ForwardSpeed speed, in ushort plugNum);
+		void variableReverse(in ReverseSpeed speed, in ushort plugNum);
+		void stop(in Direction dir, in ushort plugNum);
+		void resume(in ushort plugNum);
+		void pause(in ushort plugNum);
+		void skip(in SkipDirection direction, in SkipMode mode, in long count, in ushort plugNum);
+		void insertMedia();
+		void ejectMedia();
+		AvDiscTransportState getState(in Direction dir, in ushort plugNum);
+		AvDiscFormat getFormat();
+		AvDiscCounterValue getPosition(in Direction dir, in ushort plugNum);
+		void erase(in ushort listNumber, in ushort indexNumber);
+		void putItemList(in ushort listNumber, in sequence<ItemIndex> itemIndexList);
+
+		AvDiscCapabilities getCapability();
+	};
+
+	interface SystemEvent
+	{
+		void AvDiscItemListChanged(in ushort listNumber);
+		void AvDiscStateChanged(in AvDiscTransportState state, in Direction dir, in ushort plugNum);
+	};
+};

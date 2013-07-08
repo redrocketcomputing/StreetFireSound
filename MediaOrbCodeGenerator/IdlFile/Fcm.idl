@@ -1,0 +1,197 @@
+module Fcm
+{
+	typedef ushort FcmAttributeIndicator;
+	typedef ushort NotificationId;
+
+	typedef ushort ErrorCode;
+	const ErrorCode SUCCESS = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+	const ErrorCode ACCESS_VIOLATION = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED = 0x0004;
+	const ErrorCode RESERVED = 0x0005;
+	const ErrorCode INVALID_PARAMETER = 0x0006;
+	const ErrorCode RESOURCE_LIMIT = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT = 0x000a;
+	const ErrorCode LOCAL = 0x000b;
+	const ErrorCode STANDBY = 0x000c;
+
+	const ErrorCode NO_NOT = 0x0080;
+	const ErrorCode NO_PROT = 0x0081;
+	const ErrorCode NO_ADDR = 0x0082;
+	const ErrorCode NOT_SET = 0x0083;
+	const ErrorCode WAS_WINKING = 0x0084;
+	const ErrorCode WAS_NOT_WINKING = 0x0085;
+	const ErrorCode NOT_SUPPORTED = 0x0086;
+	const ErrorCode NO_RESERVE = 0x0087;
+	const ErrorCode NO_RELEASE = 0x0088;
+	const ErrorCode NO_COMMAND = 0x0089;
+	const ErrorCode ATTACH = 0x008a;
+	const ErrorCode NOT_POSS  = 0x008b;
+
+    enum OperationId
+    {
+    	GET_HUID,
+        GET_DCM_SEID,
+        GET_FCM_TYPE,
+        GET_POWER_STATE,
+        SET_POWER_STATE,
+		NATIVE_COMMAND,
+        SUBSCRIBE_NOTIFICATION,
+        UNSUBSCRIBE_NOTIFICATION,
+        GET_PLUG_COUNT,
+        GET_SUPPORTED_STREAM_TYPES,
+        WINK,
+        UNWINK,
+        CAN_WINK,
+        RESERVE,
+        RELEASE,
+        GET_RESERVATION_STATUS,
+        GET_WORST_CASE_STARTUP_TIME,
+        SET_PLUG_SHARING,
+        IEC_ATTACH,
+        IEC_DETACH
+    };
+
+	enum ForwardSpeed
+	{
+		PLAY_PAUSE,
+		SLOWEST_FORWARD,
+		SLOW_FORWARD_5,
+		SLOW_FORWARD_4,
+		SLOW_FORWARD_3,
+		SLOW_FORWARD_2,
+		SLOW_FORWARD_1,
+		FAST_FORWARD_1,
+		FAST_FORWARD_2,
+		FAST_FORWARD_3,
+		FAST_FORWARD_4,
+		FAST_FORWARD_5,
+		FASTEST_FORWARD
+	};
+	
+	
+	enum ReverseSpeed
+	{
+		SLOWEST_REVERSE,
+		SLOW_REVERSE_5,
+		SLOW_REVERSE_4,
+		SLOW_REVERSE_3,
+		SLOW_REVERSE_2,
+		SLOW_REVERSE_1,
+		X1_REVERSE,
+		FAST_REVERSE_1,
+		FAST_REVERSE_2,
+		FAST_REVERSE_3,
+		FAST_REVERSE_4,
+		FAST_REVERSE_5,
+		FASTEST_REVERSE
+	};
+	
+	
+	enum SkipDirection
+	{
+		FORWARD,
+		REVERSE
+	};
+	
+	enum SkipMode
+	{
+		FRAME,
+		SCENE,
+		TRACK,
+		VISS,
+		GOP,
+		INDEX,
+		SKIP,
+		PHOTO_PICTURE,
+		PROGRAM,
+		MARKER,
+		RELATIVE_TIME,
+		ABSOLUTE_TIME
+	};
+	
+	struct TimeCode
+	{
+		octet	hour;
+		octet	minute;
+		octet	sec;
+		octet	frame;
+	};
+	
+	enum WriteProtectStatus
+	{
+		WRITABLE,
+		WRITE_PROTECTED,
+		NOT_WRITEABLE,
+		UNKNOWN_WRITABLE
+	};
+	
+	struct SubscribeNotification
+	{
+		sequence<octet> currentValue;
+		NotificationId notificationId;
+	};
+
+	struct PlugCount
+	{
+		ushort inCount;
+		ushort outCount;
+	};
+/*
+	struct ClientRecord
+	{
+		SEID client;
+		boolean primary;
+		ClientRole clientRole;
+		wstring<50> info;
+		OperationCode preemptionRequestCode;
+	};
+
+	struct FcmReservationStatus
+	{
+		boolean primaryPossible;
+		boolean secondaryPossible;
+		sequence<ClientRecord> clientRecords;
+	};
+*/
+    interface Fcm
+	{
+     	HUID getHuid();
+        SEID getDcmSeid();
+        SoftwareElementType getFcmType();
+        boolean getPowerState();
+		boolean setPowerState(in boolean powerState);
+        ByteRow nativeCommand(in NativeProtocol protocol, in ByteRow command);
+		SubscribeNotification subscribeNotification(in FcmAttributeIndicator attributeIndicator, in sequence<octet> value, in CompOperation comparator, in OperationCode opCode);
+        void unsubscribeNotification(in NotificationId notificationId);
+		PlugCount getPlugCount();
+        sequence<StreamType> getSupportedStreamTypes(in ushort plugNum, in Direction direction);
+        void wink();
+        void unwink();
+        boolean canWink();
+        //void reserve(in SEID client, in ClientRole role, in wstring<50> info, in boolean primary, in boolean nonIntrusive, in OperationCode preemptionRequestCode);
+		//void release(in SEID client, in boolean neutral);
+		//FcmReservationStatus getReservationStatus();
+		long getWorstCaseStartupTime();
+        void setPlugSharing(in ushort plugNum, in boolean canShare);
+        void iecAttach(in IecPlug pcr, in InternalPlug plug);
+        void iecDetach(in IecPlug pcr, in InternalPlug plug);
+	};
+
+    interface SystemEvent
+    {
+        void powerStateChanged(in boolean powerState);
+        void powerFailureImminent();
+        void reserveIndication(in SEID client, in boolean primary);
+        void releaseIndication(in SEID client, in boolean primary, in boolean neutral);
+		void plugSharingChanged(in ushort plugNum, in boolean canShare, in SEID owner);
+    };
+
+	interface MessageCallBack
+	{
+		void fcmNotification(in NotificationId notificationId, in FcmAttributeIndicator attributeIndicator, in sequence<octet> value);
+	};
+};

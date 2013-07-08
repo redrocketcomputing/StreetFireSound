@@ -1,0 +1,124 @@
+<project name="MediaOrb" default="dist" basedir=".">
+  <description>
+    Media ORB build file
+  </description>
+
+  <!-- tweak classpath if a dev build -->
+  <condition property="classpath" value="../Util/bin">
+    <isset property="dev"/>
+  </condition>
+
+  <!-- path properties -->
+  <property name="src.dir"     location="src"/>
+  <property name="bin.dir"     location="bin"/>
+  <property name="rmi.src.dir" location="RMI"/>
+  <property name="dist.dir"    location="dist"/>
+  <property name="javadoc.dir" location="doc"/>
+  <property name="classpath"   location="lib/util.jar"/>
+
+  <!-- compiler settings -->
+  <property name="debug" value="on"/>
+  <property name="target" value="1.3"/>
+
+  <!-- default value for tag (placed in jar manifest) -->
+  <property name="mediaorb.tag" value="DEVELOPMENT"/>
+
+
+  <!-- initialize build -->
+  <target name="init">
+
+    <!-- Create the time stamp -->
+    <tstamp/>
+
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${bin.dir}"/>
+  </target>
+
+
+  <!-- compile the ORB -->
+  <target name="compile" depends="init" description="compile mediaorb library">
+    <!-- Compile the java code from generated and non generated into ${bin.dir} -->
+    <javac destdir="${bin.dir}" debug="${debug}" target="${target}" classpath="${classpath}">
+      <src path="${src.dir}"/>
+      <src path="${rmi.src.dir}"/>
+    </javac>
+  </target>
+
+
+  <!-- make javadocs -->
+  <target name="javadocs" depends="init" description="prepare javadoc documentation">
+    <mkdir dir="${javadoc.dir}"/>
+    <javadoc destdir="${javadoc.dir}"
+             sourcepath="${src.dir}"
+             packagenames="com.redrocketcomputing.*, havi.org.*"
+             use="true"
+             windowtitle="documentation"
+             version="false"
+             author="false"
+             private="false">
+      <classpath>
+        <fileset refid="project.jars"/>
+      </classpath>
+    </javadoc>
+  </target>
+
+
+  <!-- assemble the distribution (wraps the make jar with a dependency for automated build) -->
+  <target name="dist" depends="compile">
+    <antcall target="makejar"/>
+    <antcall target="makesrcjar"/>
+  </target>
+
+
+  <!-- make the distribution jar, assuming classes are already built -->
+  <target name="makejar" depends="init">
+
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist.dir}/lib"/>
+
+    <!-- Create the mediaorb library jar -->
+    <jar jarfile="${dist.dir}/lib/mediaorb.jar">
+
+      <!-- include manifest with version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${mediaorb.tag}"/>
+      </manifest>
+
+      <!-- include generated and non-generated RMI classes -->
+      <fileset dir="${bin.dir}"/>
+    </jar>
+  </target>
+
+
+  <!-- make the distribution src jar -->
+  <target name="makesrcjar" depends="init">
+
+    <!-- Create the distribution directory if necessary -->
+    <mkdir dir="${dist.dir}/src"/>
+
+    <!-- Create the src jar -->
+    <jar jarfile="${dist.dir}/src/mediaorb-src.jar">
+
+      <!-- include manifest with version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${mediaorb.tag}"/>
+      </manifest>
+
+      <!-- include non-generated classes only -->
+      <fileset dir="${src.dir}"/>
+    </jar>
+  </target>
+
+
+  <!-- clean up -->
+  <target name="clean" description="clean up" >
+    <!-- Delete the ${bin.dir} and  ${dist.dir} directory trees -->
+    <delete dir="${bin.dir}"/>
+    <delete dir="${dist.dir}"/>
+  </target>
+
+</project>

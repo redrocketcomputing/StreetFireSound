@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+AMCU-NAME: MediaManager
+AMCU-MANUFACTURE: StreetFireSound Labs, LLC
+AMCU-DESCRIPTION: Distributed Media Manager
+AMCU-CLASSNAME: com.streetfiresound.mediamanager.server.AmCodeUnit
+AMCU-PROPERTIES: configuration/mediamanageram.properties

@@ -1,0 +1,143 @@
+module MediaPlayer
+{
+	typedef unsigned short ErrorCode;
+	const ErrorCode SUCCESS = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+	const ErrorCode ACCESS_VIOLATION = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED = 0x0004;
+	const ErrorCode RESERVED = 0x0005;
+	const ErrorCode INVALID_PARAMETER = 0x0006;
+	const ErrorCode RESOURCE_LIMIT = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT = 0x000a;
+	const ErrorCode LOCAL = 0x000b;
+	const ErrorCode STANDBY = 0x000c;
+	const ErrorCode ADAPTOR_FAILURE = 0x0080;
+	const ErrorCode BAD_QUEUE_INDEX = 0x0081;
+	const ErrorCode TRANSITION_NOT_AVAILABLE = 0x0082;
+	const ErrorCode BAD_VERSION = 0x0083;
+	const ErrorCode NOT_SUPPORTED = 0x0084;
+
+	enum TransportState
+	{
+		STOP,
+		PLAY,
+		PAUSE,
+		NO_MEDIA,
+		POWER_OFF
+	};
+	
+	enum PlayMode
+	{
+		EXTERNAL,
+		DISABLED
+	};
+	
+	enum MoveDirection
+	{
+		UP,
+		DOWN
+	};
+	
+	enum SkipDirection
+	{
+		FORWARD,
+		REVERSE
+	};
+	
+	struct PlayPosition
+	{
+		unsigned long version;
+		unsigned long index;
+		MLID mediaLocationId;
+		TimeCode position;
+	};
+	
+	struct PlayQueue
+	{
+		unsigned long version;
+		sequence<MLID> queue;
+	};
+
+	enum AttributeIndicator
+	{
+		STATE,
+		MODE,
+		QUEUE,
+		POSITION
+	};
+	
+	union AttributeNotification switch(AttributeIndicator)
+	{
+		case STATE:
+			TransportState state;
+		case MODE:
+			PlayMode mode;
+		case QUEUE:
+			PlayQueue queue;
+		case POSITION:
+			PlayPosition position;
+	};
+	
+	struct SubscriptionResult
+	{
+		unsigned short notificationId;
+		AttributeNotification value;
+	};
+	
+    enum OperationId
+    {
+    	SUBSCRIBE_NOTIFICATION,
+    	UNSUBSCRIBE_NOTIFICATION,
+    	PLAY,
+    	PAUSE,
+    	RESUME,
+    	STOP,
+    	SKIP,
+    	CUE,
+    	REMOVE,
+    	MOVE,
+    	GET_STATE,
+    	GET_POSITION,
+    	GET_QUEUE,
+    	GET_MODE,
+    	SET_MODE
+	};
+	
+	interface MediaPlayer
+	{
+		SubscriptionResult subcribeNotification(in OperationCode opCode, in AttributeIndicator indicator);
+		void unsubscribeNotification(in unsigned short notificationId);
+		
+		void play(in unsigned long version, in unsigned long playIndex);
+		void pause();
+		void resume();
+		void stop();
+		void skip(in SkipDirection direction, in unsigned long count);
+		
+		long cue(in sequence<MLID> items);
+		long remove(in unsigned long version, in unsigned long start, in unsigned long size);
+		long move(in unsigned long version, in MoveDirection direction, in unsigned long start, in unsigned long size);
+
+		TransportState getState();
+		PlayPosition getPosition();
+		PlayQueue getQueue();
+		PlayMode getMode();
+		
+		void setMode(in PlayMode playMode);
+	};
+	
+	interface VendorEvent
+	{
+		void mediaPlayerStateChanged(in TransportState state);
+		void mediaPlayerModeChanged(in PlayMode mode);
+		void mediaPlayerQueueChanged(in unsigned long version);
+	};
+	
+	interface MessageCallBack
+	{
+		void mediaPlayerNotification(in unsigned long notificationId, in AttributeNotification value);
+	};
+};

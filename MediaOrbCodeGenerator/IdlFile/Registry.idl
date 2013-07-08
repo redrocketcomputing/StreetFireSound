@@ -1,0 +1,199 @@
+module Registry
+{
+		typedef uint SoftwareElementType;
+		typedef wstring<50> DeviceManufacturer;
+		typedef wstring<50> SoftwareElementManufacturer;
+		typedef wstring<16> UserPreferredName;
+		typedef wstring<50> DeviceModel;
+		typedef uint AvLanguage;
+		const AvLanguage NO_AV_LANGUAGE = 0x00;
+		const AvLanguage AVC_LANGUAGE = 0x01;
+		const AvLanguage CAL_LANGUAGE = 0x02;
+
+		enum DeviceClass
+		{
+			LAV,
+			BAV,
+			IAV,
+			FAV
+		};
+
+		typedef uint GuiReq;
+		const GuiReq NO_GUI = 0x00;
+		const GuiReq DDI_GUI = 0x01;
+		const GuiReq HAVLET_GUI = 0x02;
+		
+		typedef uint AttributeName;
+		const AttributeName	ATT_SE_TYPE = 0x00;
+		const AttributeName	ATT_VENDOR_ID = 0x01;
+		const AttributeName	ATT_HUID = 0x02;
+		const AttributeName	ATT_TARGET_ID = 0x03;
+		const AttributeName	ATT_INTERFACE_ID = 0x04;
+		const AttributeName	ATT_DEVICE_CLASS = 0x05;
+		const AttributeName	ATT_GUI_REQ = 0x06;
+		const AttributeName	ATT_MEDIA_FORMAT_ID = 0x07;
+		const AttributeName	ATT_DEVICE_MANUF = 0x08;
+		const AttributeName	ATT_DEVICE_MODEL = 0x09;
+		const AttributeName	ATT_SE_MANUF = 0x0a;
+		const AttributeName	ATT_SE_VERS = 0x0b;
+		const AttributeName	ATT_AV_LANG = 0x0c;
+		const AttributeName	ATT_USER_PREF_NAME = 0x0d;
+
+		struct Attribute
+		{
+			AttributeName	name;
+			sequence<octet> value;
+		};
+
+		enum AttributeClassName
+		{
+			SE_TYPE,
+			VENDOR_ID,
+			HUID,
+			TARGET_ID,
+			INTERFACE_ID,
+			DEVICE_CLASS,
+			GUI_REQ,
+			MEDIA_FORMAT_ID,
+			DEVICE_MANUF,
+			DEVICE_MODEL,
+			SE_MANUF,
+			SE_VERS,
+			AV_LANG,
+			USER_PREF_NAME,
+			UNKNOWN
+		};
+		
+		union AttributeClass switch(AttributeClassName)
+		{
+			case SE_TYPE:
+				uint SoftwareElementType;
+								
+			case VENDOR_ID:
+				VendorId vendorId;
+				
+			case HUID:
+				HUID huid;
+				
+			case TARGET_ID:
+				TargetId targetId;
+				
+			case INTERFACE_ID:
+				InterfaceId interfaceId;
+				
+			case DEVICE_CLASS:
+				DeviceClass deviceClass;
+							
+			case GUI_REQ:
+				GuiReq guiReq;
+				
+			case MEDIA_FORMAT_ID:
+				MediaFormatId mediaFormatId;
+				
+			case DEVICE_MANUF:
+				DeviceManufacturer deviceManufacture;
+			
+			case DEVICE_MODEL:
+				DeviceModel deviceModel;
+			
+			case SE_MANUF:
+				SoftwareElementManufacturer softwareElementManufacture;
+				
+			case SE_VERS:
+				Version softwareElementVersion;
+				
+			case AV_LANG:
+				AvLanguage avLanguage;
+				
+			case USER_PREF_NAME:
+				UserPreferredName userPreferredName;
+				
+			case UNKNOWN:
+				sequence<octet> value;
+		};
+
+		struct QueryResult
+		{
+			sequence<SEID> seidList;
+			boolean isComplete;
+		};
+		
+		typedef ushort ErrorCode;
+		const ErrorCode SUCCESS = 0x0000;
+		const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+		const ErrorCode ACCESS_VIOLATION = 0x0002;
+		const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+		const ErrorCode NOT_IMPLEMENTED = 0x0004;
+		const ErrorCode RESERVED = 0x0005;
+		const ErrorCode INVALID_PARAMETER = 0x0006;
+		const ErrorCode RESOURCE_LIMIT = 0x0007;
+		const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+		const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+		const ErrorCode INCOMPLETE_RESULT = 0x000a;
+		const ErrorCode LOCAL = 0x000b;
+		const ErrorCode STANDBY = 0x000c;
+		const ErrorCode LOCATION = 0x0080;
+		const ErrorCode ATTRIBUTE_NAME = 0x0081;
+		const ErrorCode IDENTIFIER = 0x0082;
+		const ErrorCode NETWORK = 0x0083;
+
+		enum BoolOperation 
+		{
+			AND,
+			OR
+		};
+
+		enum QueryType 
+		{
+			SIMPLE, 
+			COMPLEX
+		};
+
+		union Query switch(QueryType)
+		{
+			case SIMPLE:
+				AttributeName   attributeName;
+				sequence<octet> compareValue;
+				CompOperation compareOperation;
+			case COMPLEX:
+				Query query1;
+				Query query2;
+				BoolOperation boolOperation;
+		};
+
+		enum OperationId
+		{
+			REGISTER_ELEMENT,
+			UNREGISTER_ELEMENT,
+			RETRIEVE_ATTRIBUTES,
+			GET_ELEMENT,
+			SUBSCRIBE,
+			UNSUBSCRIBE
+		};
+
+		interface Registry
+		{
+			void registerElement(in SEID seid, in sequence<Attribute> table);
+			void unregisterElement(in SEID seid);
+			sequence<Attribute> retrieveAttributes (in SEID seid);
+			QueryResult getElement(in Query query);
+  			long subscribe(in OperationCode opCode, in Query query);
+  			void unsubscribe(in long queryId);
+		};
+
+		interface MessageCallBack
+		{
+			void matchFound(in long queryId, in sequence<SEID> seidList);
+		};
+
+		interface SystemEvent
+		{
+			void newSoftwareElement(in SEID seid, in boolean hasHuid, in HUID huid);
+			void goneSoftwareElement(in SEID seid);
+		};
+		
+		interface VendorEvent
+		{
+			void newSoftwareElementAttributes(in SEID seid, in sequence<Attribute> table);
+		};
+};

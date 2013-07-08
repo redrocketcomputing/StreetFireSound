@@ -1,0 +1,240 @@
+module Havi
+{	//Basic HAVi Types
+	typedef unsigned long long uint64;
+	typedef unsigned long uint;
+	typedef unsigned short ushort;
+	typedef char uchar;
+	//typedef octet GUID[8];
+	//typedef octet VendorId[3];
+	//typedef octet SEID[10];
+	typedef ushort ApiCode;
+
+
+	typedef ushort CompOperation;
+
+
+
+	struct GUID
+	{
+		octet value[8];
+
+	};
+
+
+	struct SEID
+	{
+		GUID guid;
+		short handle;
+	};
+
+
+	struct VendorId
+	{
+		octet value[3];
+	};
+
+
+
+	struct OperationCode
+	{
+		ApiCode apiCode;
+		uchar operationId;
+	};
+
+	struct Status
+	{
+		ApiCode apiCode;
+		ushort errCode;
+	};
+
+	typedef uint Version;
+
+	struct MediaFormatId
+	{
+		VendorId	vendorId;
+		uchar		category;
+		ushort		majorType;
+		ushort		minorType;
+	};
+
+	struct ImageTypeId
+	{
+		VendorId	vendorId;
+		ushort		typeNo;
+
+	};
+
+	struct StreamTypeId
+	{
+		VendorId	vendorId;
+		ushort		typeNo;
+	};
+
+
+	struct DateTime
+	{
+		ushort	year;
+		uchar	month;
+		uchar	day;
+		uchar	hour;
+		uchar	minute;
+		uchar	sec;
+		ushort	msec;
+	};
+
+
+	const ApiCode MSG = 0x7fff;
+	const ApiCode VERSION = 0x0000;
+	const ApiCode CMM1394 = 0x0001;
+	const ApiCode EVENTMANAGER = 0x0002;
+	const ApiCode REGISTRY = 0x0003;
+	const ApiCode DCM = 0x0004;
+	const ApiCode FCM = 0x0005;
+	const ApiCode DCMMANAGER = 0x0007;
+	const ApiCode STREAMMANAGER = 0x0008;
+	const ApiCode RESOURCEMANAGER = 0x0009;
+	const ApiCode DDITARGET = 0x000a;
+	const ApiCode UNUSED = 0x000b;
+	const ApiCode APPLICATIONMODULE = 0x000c;
+	const ApiCode TUNER = 0x000d;
+	const ApiCode VCR = 0x000e;
+	const ApiCode CLOCK = 0x000f;
+	const ApiCode CAMERA = 0x0011;
+	const ApiCode AVDISC = 0x0012;
+	const ApiCode AMPLIFIER = 0x0013;
+	const ApiCode DISPLAY = 0x0014;
+	const ApiCode MODEM = 0x0015;
+	const ApiCode WEBPROXY = 0x0016;
+	const ApiCode CMM_IP = 0x8001;
+	const ApiCode ANY = 0xffff;
+
+
+
+
+	typedef uint SoftwareElementType;
+
+	const SoftwareElementType MESSAGING_SYSTEM = 0x00000000;
+	const SoftwareElementType COMMUNICATION_MEDIA_MANAGER = 0x00000001;
+	const SoftwareElementType REGISTRY = 0x00000002;
+	const SoftwareElementType EVENTMANAGER = 0x00000003;
+	const SoftwareElementType DCM_MANAGER = 0x00000004;
+	const SoftwareElementType STREAM_MANAGER = 0x00000005;
+	const SoftwareElementType RESOURCE_MANAGER = 0x00000006;
+	const SoftwareElementType GENERIC_FCM = 0x00000100;
+	const SoftwareElementType TUNER_FCM = 0x00000101;
+	const SoftwareElementType VCR_FCM = 0x00000102;
+	const SoftwareElementType CLOCK_FCM = 0x00000103;
+	const SoftwareElementType CAMERA_FCM = 0x00000104;
+	const SoftwareElementType AVDISC_FCM = 0x00000105;
+	const SoftwareElementType AMPLIFIER_FCM = 0x00000106;
+	const SoftwareElementType DISPLAY_FCM = 0x00000107;
+	const SoftwareElementType AVDISPLAY_FCM = 0x00000108;
+	const SoftwareElementType MODEM_FCM  = 0x00000109;
+	const SoftwareElementType WEBPROXY_FCM = 0x0000010a;
+	const SoftwareElementType JUKEBOX_FCM = 0x0000010b;
+	const SoftwareElementType DCM = 0x00008000;
+	const SoftwareElementType APPLICATION_MODULE = 0x00800001;
+
+
+
+
+	enum SystemEventType
+	{
+		NEW_DEVICES,
+		GONE_DEVICES,
+		NETWORK_RESET,
+		SYSTEM_READY,
+		MSG_LEAVE,
+		MSG_TIMEOUT,
+		MSG_ERROR,
+		NEW_SOFTWARE_ELEMENT
+		GONE_SOFTWARE_ELEMENT,
+		USER_PREFERRED_NAME_CHANGED,
+		POWER_STATE_CHANGED,
+		POWER_FAILURE_IMMINENT,
+		DEVICE_CONNECTION_ADDED,
+		DEVICE_CONNECTION_DROPPED,
+		DEVICE_CONNECTION_CHANGED,
+		TRANSMISSION_FORMAT_CHANGED,
+		BANDWIDTH_REQUIREMENT_CHANGED,
+		CONTENT_LIST_CHANGED,
+		STREAM_TYPE_CHANGED,
+		RESERVE_INDICATION,
+		RELEASE_INDICATION,
+		PLUG_SHARING_CHANGED,
+		DCM_INSTALL_INDICATION,
+		DCM_UNINSTALL_INDICATION,
+		CONNECTION_DROPPED,
+		CONNECTION_ADDED,
+		CONNECTION_CHANGED,
+		INVALID_SCHEDULED_ACTION,
+		ABORTED_SCHEDULED_ACTION,
+		ERRONEOUS_SCHEDULED_ACTION,
+		TUNER_SERVICE_CHANGED,
+		VCR_STATE_CHANGED,
+		CAMERA_VIDEO_STATE_CHANGED,
+		AVDISC_ITEM_LIST_CHANGED,
+		AVDISC_STATE_CHANGED,
+		GUID_LIST_READY
+
+	};
+
+
+
+/*
+	enum ErrorCode
+	{
+		SUCCESS,
+		UNKNOWN_MESSAGE,
+		ACCESS_VIOLATION,
+		UNIDENTIFIED_FAILURE,
+		NOT_IMPLEMENTED,
+		RESERVED,
+		INVALID_PARAMETER,
+		RESOURCE_LIMIT,
+		PARAMETER_SIZE_LIMIT,
+		INCOMPLETE_MESSAGE,
+		INCOMPLETE_RESULT,
+		LOCAL,
+		STANDBY
+	};
+*/
+
+		interface Dcm
+		{
+
+			DeviceIcon GetDeviceIcon();
+			HUID GetHuid();
+			ushort GetFcmCount();
+			sequence<SEID> GetFcmSeidList();
+			DeviceClass GetDeviceClass();
+			wstring GetDeviceManufacturer();
+			wstring GetUserPreferredName();
+			void SetUserPreferredName(in wstring name);
+			boolean GetPowerState();
+			boolean SetPowerState(in boolean powerState);
+			ByteRow NativeCommand(in NativeProtocol protocol, in ByteRow command);
+			DcmControlCapability GetControlCapability();
+			DcmHavletCodeUnitProfile GetHavletCodeUnitProfile();
+			sequence<octet> GetHavletCodeUnit(in long firstByte, in long lastByte);
+                        sequence<ContentIconRef> GetContentIconList(in ContentType type);
+                        void StopContent(in ContentType contentType, in uint handle);
+                        HUID AddVirtualFcm();
+                        void RemoveVirtualFcm();
+   		};
+
+
+
+                interface SystemEvent
+                {
+                	void UserPreferredNameChanged(in wstring name);
+                        void PowerStateChanged(in boolean powerState);
+                        void PowerFailureImminent();
+                        void ContentListChanged(in ContentType type);
+                };
+
+
+
+
+
+};

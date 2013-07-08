@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+    <jar path="/home/stephen/workspace/nfs-target/opt/streetfire/rbx1600dcm-client.jar"/>
+    <options overwrite="true" compress="true" exportErrors="true" exportWarnings="true" saveDescription="true" descriptionLocation="/Rbx1600Dcm/rbx1600dcm-client.jardesc" useSourceFolders="false" buildIfNeeded="true"/>
+    <manifest manifestVersion="1.0" usesManifest="true" reuseManifest="true" saveManifest="true" generateManifest="false" manifestLocation="/Rbx1600Dcm/rbx1600dcm-client.manifest">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportOutputFolder="false" exportJavaFiles="false">
+        <javaElement handleIdentifier="=Rbx1600Dcm/RMI&lt;com.redrocketcomputing.havi.fcm.sonyjukebox.types"/>
+        <javaElement handleIdentifier="=Rbx1600Dcm/RMI&lt;com.redrocketcomputing.havi.fcm.sonyjukebox.constants"/>
+        <javaElement handleIdentifier="=Rbx1600Dcm/src&lt;com.redrocketcomputing.havi.constants"/>
+        <javaElement handleIdentifier="=Rbx1600Dcm/RMI&lt;com.redrocketcomputing.havi.fcm.sonyjukebox.rmi{SonyJukeboxClient.java"/>
+    </selectedElements>
+</jardesc>

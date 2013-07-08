@@ -1,0 +1,246 @@
+module Havi
+{
+	//Basic HAVi Types
+	typedef unsigned long long uint64;
+	typedef unsigned long uint;
+	typedef unsigned short ushort;
+	typedef char uchar;
+	typedef unsigned long ulong;
+	typedef ushort ApiCode;
+
+	typedef ushort CompOperation;
+	typedef ushort InterfaceId;
+	typedef wstring Version;
+	typedef wstring Release;
+	
+	struct GUID
+	{
+		octet value[8];
+	};
+
+	struct SEID
+	{
+		GUID guid;
+		short handle;
+	};
+
+	struct VendorId
+	{
+		octet value[3];
+	};
+
+	struct OperationCode
+	{
+		ApiCode apiCode;
+		uchar operationId;
+	};
+
+	struct Status
+	{
+		ApiCode apiCode;
+		ushort errCode;
+	};
+
+	struct MediaFormatId
+	{
+		VendorId	vendorId;
+		uchar		category;
+		ushort		majorType;
+		ushort		minorType;
+	};
+
+	struct ImageTypeId
+	{
+		VendorId	vendorId;
+		ushort		typeNo;
+
+	};
+
+	struct StreamTypeId
+	{
+		VendorId	vendorId;
+		ushort		typeNo;
+	};
+
+
+
+	struct DateTime
+	{
+		ushort	year;
+		uchar	month;
+		uchar	day;
+		uchar	hour;
+		uchar	minute;
+		uchar	sec;
+		ushort	msec;
+	};
+
+	const ApiCode MSG = 0x7fff;
+	const ApiCode VERSION = 0x0000;
+	const ApiCode CMMIP = 0x0001;
+	const ApiCode EVENTMANAGER = 0x0002;
+	const ApiCode REGISTRY = 0x0003;
+	const ApiCode DCM = 0x0004;
+	const ApiCode FCM = 0x0005;
+	const ApiCode DCMMANAGER = 0x0007;
+	const ApiCode STREAMMANAGER = 0x0008;
+	const ApiCode RESOURCEMANAGER = 0x0009;
+	const ApiCode DDITARGET = 0x000a;
+	const ApiCode UNUSED = 0x000b;
+	const ApiCode APPLICATIONMODULE = 0x000c;
+	const ApiCode TUNER = 0x000d;
+	const ApiCode VCR = 0x000e;
+	const ApiCode CLOCK = 0x000f;
+	const ApiCode CAMERA = 0x0011;
+	const ApiCode AVDISC = 0x0012;
+	const ApiCode AMPLIFIER = 0x0013;
+	const ApiCode DISPLAY = 0x0014;
+	const ApiCode MODEM = 0x0015;
+	const ApiCode WEBPROXY = 0x0016;
+	const ApiCode APPLICATIONMODULEMANAGER = 0x0017;
+
+	const ApiCode CMM_IP = 0x8001;
+	const ApiCode MEDIACATALOG = 0x800b;
+	const ApiCode PLAYLISTCATALOG = 0x800c;
+	const ApiCode MEDIAPLAYER = 0x800d;
+	const ApiCode SONYJUKEBOX = 0x800e;
+	const ApiCode ANY = 0xffff;
+
+
+	typedef ushort SoftwareElementHandle;
+	const SoftwareElementHandle MESSAGING_SYSTEM = 0x0000;
+	const SoftwareElementHandle COMMUNICATION_MEDIA_MANAGER = 0x0001;
+	const SoftwareElementHandle REGISTRY = 0x0002;
+	const SoftwareElementHandle EVENT_MANAGER = 0x0003;
+	const SoftwareElementHandle DCM_MANAGER = 0x0004;
+	const SoftwareElementHandle STREAM_MANAGER = 0x0005;
+	const SoftwareElementHandle RESOURCE_MANAGER = 0x0006;
+	const SoftwareElementHandle MAINTENANCE_MANAGER = 0x0007;
+	const SoftwareElementHandle AM_MANAGER = 0x0008;
+	const SoftwareElementHandle COMMUNICATION_MEDIA_MANAGER_SLINK = 0x00000009;
+
+	typedef uint SoftwareElementType;
+	const SoftwareElementType MESSAGING_SYSTEM = 0x00000000;
+	const SoftwareElementType COMMUNICATION_MEDIA_MANAGER = 0x00000001;
+	const SoftwareElementType REGISTRY = 0x00000002;
+	const SoftwareElementType EVENTMANAGER = 0x00000003;
+	const SoftwareElementType DCM_MANAGER = 0x00000004;
+	const SoftwareElementType STREAM_MANAGER = 0x00000005;
+	const SoftwareElementType RESOURCE_MANAGER = 0x00000006;
+	const SoftwareElementType MAINTENANCE_MANAGER = 0x00000007;
+	const SoftwareElementType AM_MANAGER = 0x00000008;
+	const SoftwareElementType COMMUNICATION_MEDIA_MANAGER_SLINK = 0x00000009;
+	const SoftwareElementType GENERIC_FCM = 0x00000100;
+	const SoftwareElementType TUNER_FCM = 0x00000101;
+	const SoftwareElementType VCR_FCM = 0x00000102;
+	const SoftwareElementType CLOCK_FCM = 0x00000103;
+	const SoftwareElementType CAMERA_FCM = 0x00000104;
+	const SoftwareElementType AVDISC_FCM = 0x00000105;
+	const SoftwareElementType AMPLIFIER_FCM = 0x00000106;
+	const SoftwareElementType DISPLAY_FCM = 0x00000107;
+	const SoftwareElementType AVDISPLAY_FCM = 0x00000108;
+	const SoftwareElementType MODEM_FCM  = 0x00000109;
+	const SoftwareElementType WEBPROXY_FCM = 0x0000010a;
+	const SoftwareElementType DCM = 0x00008000;
+	const SoftwareElementType APPLICATION_MODULE = 0x00800001;
+	
+	typedef ushort VendorEventType;
+	const VendorEventType SONYJUKEBOX_ITEM_LIST_CHANGED = 0x0000;
+	const VendorEventType NEW_SOFTWARE_ELEMENT_ATTRIBUTES = 0x0001;
+	const VendorEventType CHANGED_MEDIA_CATALOG = 0x0005;
+	const VendorEventType PLAYLIST_CATALOG_CHANGED = 0x0006;
+	const VendorEventType APPLICATION_MODULE_INSTALLED = 0x0007;
+	const VendorEventType APPLICATION_MODULE_UNINSTALLED = 0x0008;
+	const VendorEventType MEDIA_PLAYER_STATE_CHANGED = 0x0009;
+	const VendorEventType MEDIA_PLAYER_MODE_CHANGED = 0x000a;
+	const VendorEventType MEDIA_PLAYER_QUEUE_CHANGED = 0x000b;
+	
+	typedef ushort SystemEventType;
+	const SystemEventType NEW_DEVICES = 0x0001;
+	const SystemEventType GONE_DEVICES = 0x0002;
+	const SystemEventType NETWORK_RESET = 0x0003;
+	const SystemEventType SYSTEM_READY = 0x0004;
+	const SystemEventType MSG_LEAVE = 0x0005;
+	const SystemEventType MSG_TIMEOUT = 0x0006;
+	const SystemEventType MSG_ERROR = 0x0007;
+	const SystemEventType NEW_SOFTWARE_ELEMENT = 0x0008;
+	const SystemEventType GONE_SOFTWARE_ELEMENT = 0x0009;
+	const SystemEventType USER_PREFERRED_NAME_CHANGED = 0x000a;
+	const SystemEventType POWER_STATE_CHANGED = 0x000b;
+	const SystemEventType POWER_FAILURE_IMMINENT = 0x000c;
+	const SystemEventType DEVICE_CONNECTION_ADDED = 0x000d;
+	const SystemEventType DEVICE_CONNECTION_DROPPED = 0x000e;
+	const SystemEventType DEVICE_CONNECTION_CHANGED = 0x000f;
+	const SystemEventType TRANSMISSION_FORMAT_CHANGED = 0x0010;
+	const SystemEventType BANDWIDTH_REQUIREMENT_CHANGED = 0x0011;
+	const SystemEventType CONTENT_LIST_CHANGED = 0x0012;
+	const SystemEventType STREAM_TYPE_CHANGED = 0x0013;
+	const SystemEventType RESERVE_INDICATION = 0x0014;
+	const SystemEventType RELEASE_INDICATION = 0x0015;
+	const SystemEventType PLUG_SHARING_CHANGED = 0x0016;
+	const SystemEventType DCM_INSTALL_INDICATION = 0x0017;
+	const SystemEventType DCM_UNINSTALL_INDICATION = 0x0018;
+	const SystemEventType CONNECTION_DROPPED = 0x0019;
+	const SystemEventType CONNECTION_ADDED = 0x001a;
+	const SystemEventType CONNECTION_CHANGED = 0x001b;
+	const SystemEventType INVALID_SCHEDULED_ACTION = 0x001c;
+	const SystemEventType ABORTED_SCHEDULED_ACTION = 0x001d;
+	const SystemEventType ERRONEOUS_SCHEDULED_ACTION = 0x001e;
+	const SystemEventType TUNER_SERVICE_CHANGED = 0x001f;
+	const SystemEventType VCR_STATE_CHANGED = 0x0020;
+	const SystemEventType CAMERA_VIDEO_STATE_CHANGED = 0x0021;
+	const SystemEventType AVDISC_ITEM_LIST_CHANGED = 0x0022;
+	const SystemEventType AVDISC_STATE_CHANGED = 0x0023;
+	const SystemEventType GUID_LIST_READY = 0x0024;
+	
+	typedef ushort GeneralErrorCode;	
+	const GeneralErrorCode SUCCESS = 0x0000;
+	const GeneralErrorCode UNKNOWN_MESSAGE = 0x0001;
+	const GeneralErrorCode ACCESS_VIOLATION = 0x0002;
+	const GeneralErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+	const GeneralErrorCode NOT_IMPLEMENTED = 0x0004;
+	const GeneralErrorCode RESERVED = 0x0005;
+	const GeneralErrorCode INVALID_PARAMETER = 0x0006;
+	const GeneralErrorCode RESOURCE_LIMIT = 0x0007;
+	const GeneralErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+	const GeneralErrorCode INCOMPLETE_MESSAGE = 0x0009;
+	const GeneralErrorCode INCOMPLETE_RESULT = 0x000a;
+	const GeneralErrorCode LOCAL = 0x000b;
+	const GeneralErrorCode STANDBY = 0x000c;
+
+	typedef ushort ComparisonOperator;
+	const ComparisonOperator ANY = 0x0000;
+	const ComparisonOperator EQU = 0x0001;
+	const ComparisonOperator NEQU = 0x0002;
+	const ComparisonOperator  GT = 0x0003;
+	const ComparisonOperator  GE = 0x0004;
+	const ComparisonOperator  LT = 0x0005;
+	const ComparisonOperator  LE = 0x0006;
+	const ComparisonOperator  BWA = 0x0007;
+	const ComparisonOperator  BWO = 0x0008;
+	const ComparisonOperator  SEQU = 0x8001;
+	const ComparisonOperator  SNEQU = 0x8002;
+	const ComparisonOperator  SGT = 0x8003;
+	const ComparisonOperator  SGE = 0x8004;
+	const ComparisonOperator  SLT = 0x8005;
+	const ComparisonOperator  SLE = 0x8006;
+	const ComparisonOperator  SBWA =0x8007;
+	const ComparisonOperator  SBWO =0x8008;
+
+	typedef uint64 MediaFormat;
+	const MediaFormat NO_MEDIA_PRESENT = 0xffffffffffl;
+	const MediaFormat UNKNOWN_FORMAT = 0x0000000000;
+	const MediaFormat DISC_NO_MEDIA_PRESENT = 0x02ffffffffl;
+	const MediaFormat DISC_UNKNOWN_FORMATION = 0x0200000000l;
+	const MediaFormat DISC_CD_DA = 0x0200010001l;
+	const MediaFormat DISC_CD_VIDEO = 0x0200010002l;
+	const MediaFormat DISC_CD_PHOTO = 0x0200010003l;
+	const MediaFormat DISC_CD_ROM = 0x0200010004l;
+	const MediaFormat DISC_CD_R = 0x0200010005l;
+	
+	typedef uint TransferProtocolMessageTypes;
+	const TransferProtocolMessageTypes SIMPLE = 1;
+	const TransferProtocolMessageTypes RELIABLE = 2;
+	const TransferProtocolMessageTypes RELIABLE_ACK = 3;
+	const TransferProtocolMessageTypes RELIABLE_NOACK = 4;
+};

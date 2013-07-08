@@ -1,0 +1,139 @@
+module ResourceManager
+{
+
+	enum ClientRole
+	{
+		USER,
+		SYSTEM
+	};
+
+	enum ReservationResult
+	{
+		FAILED_OTHER,
+		PRIMARY,
+		SECONDARY,
+		FAILED_SELF,
+		NOT_SUPPORTED,
+		NO_RESOURCE
+	};
+
+	enum NegotiationResult
+	{
+		ACCEPTED,
+		REJECTED,
+		TIMEOUT,
+		NOT_SUPPORTED,
+		NO_RESOURCE,
+		SYSTEM_CLIENT
+	};
+
+
+		typedef ushort ErrorCode;
+		const ErrorCode SUCCESS = 0x0000;
+		const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+		const ErrorCode ACCESS_VIOLATION = 0x0002;
+		const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+		const ErrorCode NOT_IMPLEMENTED = 0x0004;
+		const ErrorCode RESERVED = 0x0005;
+		const ErrorCode INVALID_PARAMETER = 0x0006;
+		const ErrorCode RESOURCE_LIMIT = 0x0007;
+		const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+		const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+		const ErrorCode INCOMPLETE_RESULT = 0x000a;
+		const ErrorCode LOCAL = 0x000b;
+		const ErrorCode STANDBY = 0x000c;
+
+		const ErrorCode COMM_CHECK = 0x0080;
+		const ErrorCode CONT_SEID = 0x0081;
+		const ErrorCode TIME = 0x0082;
+		const ErrorCode INV_PLUG = 0x0083;
+		const ErrorCode INSUFF_BANDWIDTH = 0x0084;
+		const ErrorCode INV_INDEX = 0x0085;
+		const ErrorCode MISSING_RES = 0x0086;
+		const ErrorCode NOT_SUPPORTED = 0x0087;
+		const ErrorCode REJECTED = 0x0088;
+		const ErrorCode SCHED_OVERLAP = 0x0089;
+		const ErrorCode TRIGG_SEID = 0x008a;
+		const ErrorCode RESERVE_FAILED = 0x008b;
+
+
+		enum SAPeriod
+		{
+			NONE,
+			DAILY,
+			WEEKLY
+		};
+
+
+        enum OperationId
+        {
+			RESERVE,
+			RELEASE,
+			NEGOTIATE,
+			SCHEDULE_ACTION,
+			UNSCHEDULE_ACTION,
+			GET_LOCAL_SCHEDULED_ACTIONS,
+			GET_SCHEDULED_ACTION_DATA,
+			TRIGGER_NOTIFICATION,
+			GET_SCHEDULED_CONNECTIONS
+	
+		};
+
+
+
+
+		struct ResourceRequestRecord
+		{
+			SEID resource;
+			boolean primary;
+		};
+	
+		struct ResourceStatusRecord
+		{
+			SEID	resource;
+			ReservationResult acquisition;
+		};
+	
+		struct ResourceNegotiateRecord
+		{
+			SEID	resource;
+			NegotiationResult result;
+			wstring<50>	info;
+		};
+	
+	
+		struct SAReference
+		{
+			SEID actionScheduler;
+			long index;
+		};
+	
+	
+	
+		struct Command
+		{
+			OperationCode opCode;
+			sequence<octet>	command;
+			HUID	huid;
+		};
+	
+		struct SAConnection
+		{
+			FcmPlug source;
+			FcmPlug	sink;
+			StreamType	stype;
+		};
+	
+	
+	
+		struct RMConnection
+		{
+			SAConnection	connection;
+			DateTime	startTime;
+			DateTime	stopTime;
+			SAPeriod	periodicity;
+		};
+
+
+
+};

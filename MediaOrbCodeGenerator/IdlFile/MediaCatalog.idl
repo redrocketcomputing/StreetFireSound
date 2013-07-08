@@ -1,0 +1,92 @@
+module MediaCatalog
+{
+	typedef unsigned short ErrorCode;
+	const ErrorCode SUCCESS = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+	const ErrorCode ACCESS_VIOLATION = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED = 0x0004;
+	const ErrorCode RESERVED = 0x0005;
+	const ErrorCode INVALID_PARAMETER = 0x0006;
+	const ErrorCode RESOURCE_LIMIT = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT = 0x000a;
+	const ErrorCode LOCAL = 0x000b;
+	const ErrorCode STANDBY = 0x000c;
+	const ErrorCode ADAPTOR_FAILURE = 0x0080;
+	const ErrorCode BAD_MLID_INDEX = 0x0081;
+
+	typedef wstring MediaItemType;
+	const MediaItemType CDDA = "CDDA";
+	const MediaItemType PCM = "PCM";
+	const MediaItemType FLAC = "FLAC";
+	const MediaItemType VORBIS = "VORBIS";
+	const MediaItemType MP3 = "MP3";
+	const MediaItemType PLAY_LIST = "PLAY_LIST";
+	const MediaItemType UNKNOWN = "UNKNOWN";
+
+	typedef unsigned long MediaItemId;
+	
+	struct MLID
+	{
+		HUID huid;
+		unsigned short list;
+		unsigned short index;
+	};
+	
+	struct MediaMetaData
+	{
+		MLID mediaLocationId;
+		wstring title;
+		wstring artist;
+		wstring genre;
+		MediaItemType mediaType;
+		TimeCode playbackTime;
+		unsigned long contentSize;
+		DateTime initialTimeStamp;
+		DateTime lastUpdateTimeStamp;
+	};
+	
+	enum CategoryType
+	{
+		TYPE,
+		GENRE,
+		ARTIST
+	};
+	
+	struct CategorySummary
+	{
+		wstring value;
+		CategoryType type;
+		unsigned long count;
+	};
+	
+    enum OperationId
+    {
+		GET_META_DATA,
+		PUT_META_DATA,
+		GET_CATEGORY_SUMMARY,
+		GET_MEDIA_SUMMARY,
+		SEARCH_META_DATA,
+		GET_MULTIPLE_META_DATA
+    };
+    
+    interface MediaCatalog
+	{
+		sequence<MediaMetaData> getMetaData(in MLID mediaLocationId);
+		void putMetaData(in sequence<MediaMetaData> mediaMetaData);
+		
+		sequence<CategorySummary> getCategorySummary(in CategoryType type);
+		sequence<MLID> getMediaSummary(in CategoryType type, in wstring value);
+
+		sequence<MediaMetaData> searchMetaData(in wstring contains);
+
+		sequence<MediaMetaData> getMultipleMetaData(in sequence<MLID> mediaLocationIdList);
+	};
+	
+	interface VendorEvent
+	{
+		void changedMediaCatalog(in MLID hint);
+	};
+};

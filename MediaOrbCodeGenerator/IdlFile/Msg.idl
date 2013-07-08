@@ -1,0 +1,82 @@
+module Msg
+{
+		enum TransferMode
+		{
+			SIMPLE,
+			RELIABLE
+		};
+	
+		typedef octet MsgReliableAckCode;	
+		const MsgReliableAckCode SUCCESS = 0;
+		const MsgReliableAckCode SYSTEM_OVERFLOW = 1;
+		const MsgReliableAckCode UNKNOWN_TARGET_OBJECT = 2;
+		const MsgReliableAckCode TARGET_REJECT = 3;
+		
+		typedef octet ProtocolType;
+		const ProtocolType HAVI_RMI = 0x00;
+		const ProtocolType EVENT_MANAGER = 0x01;
+		const ProtocolType MESSAGE_STREAM = 0x02;
+
+
+		typedef ushort ErrorCode;
+		const ErrorCode SUCCESS = 0x0000;
+		const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+		const ErrorCode ACCESS_VIOLATION = 0x0002;
+		const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+		const ErrorCode NOT_IMPLEMENTED = 0x0004;
+		const ErrorCode RESERVED = 0x0005;
+		const ErrorCode INVALID_PARAMETER = 0x0006;
+		const ErrorCode RESOURCE_LIMIT = 0x0007;
+		const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+		const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+		const ErrorCode INCOMPLETE_RESULT = 0x000a;
+		const ErrorCode LOCAL = 0x000b;
+		const ErrorCode STANDBY = 0x000c;
+
+		const ErrorCode FAIL = 0x0080;
+		const ErrorCode ALLOC = 0x0081;
+		const ErrorCode SEND = 0x0082;
+		const ErrorCode UNKNOWN = 0x0083;
+		const ErrorCode BUSY = 0x0084;
+		const ErrorCode OVERFLOW = 0x0085;
+		const ErrorCode ACK = 0x0086;
+		const ErrorCode ELEMENT = 0x0087;
+		const ErrorCode TARGET_REJECT = 0x0088;
+		const ErrorCode SEID = 0x0089;
+		const ErrorCode SOURCE_SEID = 0x008a;
+		const ErrorCode DEST_SEID = 0x008b;
+		const ErrorCode NOT_READY = 0x008c;
+		const ErrorCode SUPER_EXISTS = 0x008d;
+		const ErrorCode TIMEOUT = 0x008e;
+		const ErrorCode PROTOCOL = 0x008f;
+		const ErrorCode SIZE = 0x0090;
+		const ErrorCode DEST_UNREACHABLE = 0x0091;
+		const ErrorCode REMOTE_API = 0x0092;
+
+
+        enum OperationId
+        {
+			PING
+		};
+	
+		interface Msg
+		{
+			boolean Ping(in SEID target);
+	
+		};
+	
+		interface SystemEvent
+		{
+			void SystemReady(in SEID seid);
+			void MsgLeave(in SEID seid);
+			void MsgTimeout(in SEID seid);
+			void MsgError(in SEID seid, in ushort attempts, in Status error);
+	
+		};
+	
+		interface MessageCallBack
+		{
+			void supervision(in SEID targetSeid);
+		};
+
+};

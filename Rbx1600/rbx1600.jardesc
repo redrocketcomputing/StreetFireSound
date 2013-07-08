@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+    <jar path="/home/stephen/workspace/nfs-target/opt/streetfire/rbx1600.jar"/>
+    <options overwrite="true" compress="true" exportErrors="true" exportWarnings="true" saveDescription="true" descriptionLocation="/Rbx1600/rbx1600.jardesc" useSourceFolders="false" buildIfNeeded="true"/>
+    <manifest manifestVersion="1.0" usesManifest="true" reuseManifest="true" saveManifest="true" generateManifest="false" manifestLocation="/Rbx1600/rbx1600.manifest" mainClassHandleIdentifier="=Rbx1600/src&lt;com.redrocketcomputing.rbx1600{Rbx1600DeviceApplication.java[Rbx1600DeviceApplication">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportOutputFolder="false" exportJavaFiles="false">
+        <javaElement handleIdentifier="=Rbx1600/src"/>
+    </selectedElements>
+</jardesc>

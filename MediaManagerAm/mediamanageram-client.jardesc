@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+    <jar path="/home/stephen/workspace/nfs-target/opt/streetfire/mediamanageram-client.jar"/>
+    <options overwrite="true" compress="true" exportErrors="true" exportWarnings="true" saveDescription="true" descriptionLocation="/MediaManagerAm/mediamanageram-client.jardesc" useSourceFolders="false" buildIfNeeded="true"/>
+    <manifest manifestVersion="1.0" usesManifest="true" reuseManifest="true" saveManifest="true" generateManifest="false" manifestLocation="/MediaManagerAm/mediamanageram-client.manifest">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportOutputFolder="false" exportJavaFiles="false">
+        <file path="/MediaManagerAm/mediamanageram.jardesc"/>
+        <javaElement handleIdentifier="=MediaManagerAm/RMI"/>
+    </selectedElements>
+</jardesc>

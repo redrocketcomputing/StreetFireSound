@@ -1,0 +1,99 @@
+<project name="Rbx1600" default="dist" basedir=".">
+  <description>
+    Rbx1600  build file
+  </description>
+
+  <!-- tweak classpath if a dev build -->
+  <condition property="classpath" value="../Util/bin:../MediaOrb/bin">
+    <isset property="dev"/>
+  </condition>
+
+  <!-- default classpath looks in lib dirs -->
+  <property name="classpath"                value="./lib/util.jar:./lib/mediaorb.jar"/>
+
+  <!-- path properties -->
+  <property name="src" location="src"/>
+  <property name="bin" location="bin"/>
+  <property name="dist" location="dist"/>
+
+  <!-- compiler settings -->
+  <property name="debug" value="on"/>
+  <property name="target" value="1.3"/>
+
+  <!-- default value for tag (placed in jar manifest) -->
+  <property name="rbx1600.tag" value="DEVELOPMENT"/>
+
+
+  <!-- initialize build -->
+  <target name="init">
+
+    <!-- create the time stamp -->
+    <tstamp/>
+
+    <!-- create the build directory structure used by compile -->
+    <mkdir dir="${bin}"/>
+  </target>
+
+
+  <!-- compile the rbx1600 support library -->
+  <target name="compile" depends="init" description="compile rbx1600 support library">
+    <!-- compile the java code from ${src} into ${bin} -->
+    <javac srcdir="${src}" destdir="${bin}" classpath="${classpath}"/>
+  </target>
+
+
+  <!-- assemble the distribution (wraps the make jar with a dependency for automated build) -->
+  <target name="dist" depends="compile">
+    <antcall target="makejar"/>
+    <antcall target="makesrcjar"/>
+  </target>
+
+
+  <!-- assemble the distribution jar, assumes classes built -->
+  <target name="makejar" depends="init">
+    <!-- create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
+
+    <!-- create the rbx1600 jar -->
+    <jar jarfile="${dist}/lib/rbx1600.jar" >
+
+      <!-- include manifest with version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${rbx1600.tag}"/>
+      </manifest>
+
+      <!-- include generated and non-generated RMI classes -->
+      <fileset dir="${bin}"/>
+    </jar>
+  </target>
+
+
+  <!-- assemble the sourcedistribution jar -->
+  <target name="makesrcjar" depends="init">
+    <!-- create the distribution directory -->
+    <mkdir dir="${dist}/src"/>
+
+    <!-- create the client library jar -->
+    <jar jarfile="${dist}/src/rbx1600-src.jar" >
+
+      <!-- include manifest with version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${rbx1600.tag}"/>
+      </manifest>
+
+      <!-- include generated and non-generated RMI classes -->
+      <fileset dir="${src}"/>
+    </jar>
+  </target>
+
+  <!-- clean up -->
+  <target name="clean" description="clean up">
+    <delete dir="${bin}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+</project>

@@ -1,0 +1,62 @@
+module DeviceControllerFcm
+{
+	typedef unsigned long long uint64;
+	typedef unsigned long uint;
+	typedef unsigned short ushort;
+	typedef char uchar;
+	typedef unsigned long ulong;
+	
+	typedef ushort ErrorCode;
+	const ErrorCode SUCCESS = 0x0000;
+	const ErrorCode UNIDENTIFIED_FAILURE = 0x0001;
+	const ErrorCode NO_SUCH_OPTION = 0x0002;
+	const ErrorCode INVALID_PARAMETER = 0x003;
+	const ErrorCode NO_SUCH_DEVICE = 0x004;
+	
+    enum OperationId
+    {
+		GET_DEVICE_DESCRIPTOR_ARRAY,
+		GET_DEVICE_OPTION_INFO_ARRAY,
+		IS_DEVICE_ENABLED,
+		SET_DEVICE_ENABLED,
+		GET_DEVICE_OPTION_INT_VALUE,
+		SET_DEVICE_OPTION_INT_VALUE,
+		GET_DEVICE_OPTION_BOOLEAN_VALUE,
+		SET_DEVICE_OPTION_BOOLEAN_VALUE,
+		GET_DEVICE_OPTION_STRING_VALUE,
+		SET_DEVICE_OPTION_STRING_VALUE
+	};	
+	
+	enum DeviceOptionType
+	{
+		INTEGER,
+		BOOLEAN,
+		STRING
+	};
+	
+	struct DeviceOptionInfo
+	{
+		wstring optionName;
+		DeviceOptionType type;
+	};
+	
+	struct DeviceDescriptor
+	{
+		wstring name;
+		wstring description;
+	};
+	
+	interface DeviceControllerFcm
+	{
+		sequence<DeviceDescriptor> GetDeviceDescriptorArray();
+		sequence<DeviceOptionInfo> GetDeviceOptionInfoArray(in wstring deviceName);
+		boolean IsDeviceEnabled(in wstring deviceName);
+		void SetDeviceEnabled(in wstring deviceName, in boolean value);
+		uint GetDeviceOptionIntValue(in wstring deviceName, in wstring optionName);
+		void SetDeviceOptionIntValue(in wstring deviceName, in wstring optionName, in uint value);
+		boolean GetDeviceOptionBooleanValue(in wstring deviceName, in wstring optionName);
+		void SetDeviceOptionBooleanValue(in wstring deviceName, in wstring optionName, in boolean value);
+		wstring GetDeviceOptionStringValue(in wstring deviceName, in wstring optionName);
+		void SetDeviceOptionStringValue(in wstring deviceName, in wstring optionName, in wstring value);				
+	};
+};

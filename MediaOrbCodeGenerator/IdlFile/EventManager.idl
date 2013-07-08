@@ -1,0 +1,67 @@
+module EventManager
+{
+	typedef ushort ErrorCode;
+	const ErrorCode SUCCESS = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+	const ErrorCode ACCESS_VIOLATION = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED = 0x0004;
+	const ErrorCode RESERVED = 0x0005;
+	const ErrorCode INVALID_PARAMETER = 0x0006;
+	const ErrorCode RESOURCE_LIMIT = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT = 0x000a;
+	const ErrorCode LOCAL = 0x000b;
+	const ErrorCode STANDBY = 0x000c;
+	const ErrorCode EXIST = 0x0080;
+	const ErrorCode DELIVERY = 0x0081;
+	const ErrorCode FORWARDING = 0x0082;
+	const ErrorCode NOT_FOUND = 0x0083;
+
+	enum OperationId
+	{
+		SUBSCRIBE,
+		UNSUBSCRIBE,
+		REPLACE,
+		ADD_EVENT,
+		REMOVE_EVENT,
+		POST_EVENT,
+		FORWARD_EVENT
+	};
+
+	enum EventIdSchema
+	{
+		SYSTEM,
+		VENDOR,
+		APP
+	};
+	
+	union EventId switch(EventIdSchema)
+	{
+		case SYSTEM:
+			ushort base;
+		case VENDOR:
+			ushort base;
+			VendorId vendorId;
+		case APP:
+			ushort base;
+			SEID seid;
+	};
+
+	interface EventManager
+	{
+		void subscribe(in sequence<EventId> eidList, in OperationCode opCode);
+		void unsubscribe();
+		void replace(in sequence<EventId> eidList, in OperationCode opCode);
+		void addEvent(in EventId eventId);
+		void removeEvent(in EventId eventId);
+		void postEvent(in EventId eventId, in boolean global, in sequence<octet> eventInfo);
+		void forwardEvent(in SEID posterSeid, in EventId eventId, in sequence<octet> eventInfo);
+	};
+
+	interface MessageCallBack
+	{
+		void EventManagerNotification(in SEID posterSeid, in EventId eventId, in sequence<octet> eventInfo);
+	};
+};

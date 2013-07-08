@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+    <jar path="/home/stephen/workspace/nfs-target/opt/streetfire/mediaorb.jar"/>
+    <options overwrite="true" compress="true" exportErrors="true" exportWarnings="true" saveDescription="true" descriptionLocation="/MediaOrb/mediaorb.jardesc" useSourceFolders="false" buildIfNeeded="true"/>
+    <manifest manifestVersion="1.0" usesManifest="true" reuseManifest="true" saveManifest="true" generateManifest="false" manifestLocation="/MediaOrb/mediaorb.manifest">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportOutputFolder="false" exportJavaFiles="false">
+        <javaElement handleIdentifier="=MediaOrb/RMI"/>
+        <javaElement handleIdentifier="=MediaOrb/src"/>
+    </selectedElements>
+</jardesc>

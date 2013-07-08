@@ -1,0 +1,62 @@
+module CmmIp
+{
+	typedef ushort ErrorCode;
+	const ErrorCode SUCCESS = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+	const ErrorCode ACCESS_VIOLATION = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED = 0x0004;
+	const ErrorCode RESERVED = 0x0005;
+	const ErrorCode INVALID_PARAMETER = 0x0006;
+	const ErrorCode RESOURCE_LIMIT = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT = 0x000a;
+	const ErrorCode LOCAL = 0x000b;
+	const ErrorCode STANDBY = 0x000c;
+
+	const ErrorCode NOT_READY = 0x0080;
+	const ErrorCode ADDRESS = 0x0081;
+	const ErrorCode HARDWARE = 0x0082;
+	const ErrorCode TYPE = 0x0083;
+	const ErrorCode SIZE = 0x0084;
+	const ErrorCode NOT_INTERESTED = 0x0085;
+	const ErrorCode NOT_FOUND = 0x0086;
+	const ErrorCode DATA = 0x0087;
+	const ErrorCode CONFLICT = 0x0088;
+	const ErrorCode UNKNOWN_GUID = 0x0089;
+	const ErrorCode TIMEOUT = 0x008a;
+	const ErrorCode INVALID_OFFSET = 0x008b;
+	const ErrorCode BUSRESET = 0x008c;
+	const ErrorCode RETRY = 0x008d;
+	const ErrorCode GUID_NOT_EXIST = 0x008e;
+	const ErrorCode GARP = 0x008f;
+	const ErrorCode CONFIGURATION = 0x0090;
+	const ErrorCode IO = 0x0091;
+
+    enum OperationId
+    {
+		GET_ACTIVE_DEVICES,
+		GET_NON_ACTIVE_DEVICES,
+		RESET_NETWORK,
+		READ,
+		WRITE
+	};
+
+	interface CmmIp
+	{
+		sequence<GUID> getActiveDevices();
+		sequence<GUID> getNonactiveDevices();
+		void resetNetwork();
+		sequence<octet> read(in GUID guid, in long address);
+		void write(in GUID guid, in long address, in sequence<octet> data);
+	};
+
+	interface SystemEvent
+	{
+		void NewDevices(in sequence<GUID> guidList);
+		void GoneDevices(in sequence<GUID> guidList);
+		void NetworkReset();
+		void GuidListReady(in sequence<GUID> activeGuidList, in sequence<GUID> nonactiveGuidList, in sequence<GUID> goneDevices, in sequence<GUID> newDevices);
+	};
+};

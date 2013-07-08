@@ -1,0 +1,173 @@
+<project name="CodeGen" default="generate" basedir=".">
+  <description>
+   Media ORB code generator build - builds rmi src jars
+  </description>
+
+  <!-- tweak paths if a dev build -->
+  <condition property="gen.mediaorb" value="../MediaOrb/RMI">
+    <isset property="dev"/>
+  </condition>
+  <condition property="gen.rbx1600dcm" value="../Rbx1600Dcm/RMI">
+    <isset property="dev"/>
+  </condition>
+  <condition property="gen.mediamanageram" value="../MediaManagerAm/RMI">
+    <isset property="dev"/>
+  </condition>
+
+  <!-- path properties -->
+  <property name="src"                location="src"/>
+  <property name="bin"                location="bin"/>
+  <property name="build"              location="build"/>
+  <property name="gen"                location="${build}/generated"/>
+  <property name="gen.mediaorb"       location="${gen}/mediaorb"/>
+  <property name="gen.rbx1600dcm"     location="${gen}/rbx1600dcm"/>
+  <property name="gen.mediamanageram" location="${gen}/mediamanageram"/>
+  <property name="dist"               location="dist"/>
+
+  <!-- default value for tag (placed in jar manifest) -->
+  <property name="codegen.tag" value="DEVELOPMENT"/>
+
+  <!-- initialize build -->
+  <target name="init">
+
+    <!-- Create the time stamp -->
+    <tstamp/>
+
+    <!-- Create the build directory structure used by compile, generate targets -->
+    <mkdir dir="${bin}"/>
+    <mkdir dir="${build}"/>
+    <mkdir dir="${gen}"/>
+    <mkdir dir="${gen.mediaorb}"/>
+    <mkdir dir="${gen.rbx1600dcm}"/>
+    <mkdir dir="${gen.mediamanageram}"/>
+    <mkdir dir="${dist}"/>
+  </target>
+
+
+  <!-- compile the code generator -->
+  <target name="compile" depends="init" description="compile mediaorb code generator">
+    <!-- Compile the java code from ${src} into ${bin} -->
+    <javac srcdir="${src}" destdir="${bin}" debug="on">
+    </javac>
+  </target>
+
+
+  <!-- define dependency so that code gen is not run unnecessarily -->
+  <condition property="generate.uptodate">
+    <and>
+      <uptodate targetfile="${dist}/mediaorb-rmi-src.jar">
+        <srcfiles dir="IdlFile" includes="*"/>
+      </uptodate>
+      <uptodate targetfile="${dist}/rbx1600dcm-rmi-src.jar">
+        <srcfiles dir="IdlFile" includes="*"/>
+      </uptodate>
+      <uptodate targetfile="${dist}/mediamanageram-rmi-src.jar">
+        <srcfiles dir="IdlFile" includes="*"/>
+      </uptodate>
+    </and>
+  </condition>
+
+
+  <!-- generate everything -->
+  <target name="generate">
+    <ant target="generate.mediaorb"/>
+    <ant target="generate.rbx1600dcm"/>
+    <ant target="generate.mediamanageram"/>
+  </target>
+
+
+  <!-- generate code from mediaorb notused-unless="generate.uptodate" -->
+  <target name="generate.mediaorb" depends="compile"  description="run mediaorb code generator">
+
+    <!-- generate mediaorb src -->
+    <java classname="com.streetfiresound.codegenerator.parser.CodeGenerator" fork="true">
+      <classpath>
+        <pathelement location="${bin}"/>
+      </classpath>
+      <arg line="IdlFile/MediaOrb.conf ${gen.mediaorb} ${gen.mediaorb}"/>
+    </java>
+
+    <!-- generate src jar -->
+    <jar jarfile="${dist}/mediaorb-rmi-src.jar">
+
+      <!-- manifest with module version, date -->
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Built-At" value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${codegen.tag}"/>
+      </manifest>
+
+      <!-- include mediaorb generated src only -->
+      <fileset dir="${gen.mediaorb}">
+        <include name="**/*.java"/>
+      </fileset>
+    </jar>
+  </target>
+
+
+  <!-- generate code for rbx1600 DCM notused-unless="generate.uptodate" -->
+  <target name="generate.rbx1600dcm"  description="run mediaorb code generator">
+
+    <!-- run generator for rbx1600dcm idls -->
+    <java classname="com.streetfiresound.codegenerator.parser.CodeGenerator" fork="true">
+      <classpath>
+        <pathelement location="${bin}"/>
+      </classpath>
+      <arg line="IdlFile/Rbx1600Dcm.conf ${gen.rbx1600dcm} ${gen.mediaorb}"/>
+    </java>
+
+    <!-- generate src jar -->
+    <jar jarfile="${dist}/rbx1600dcm-rmi-src.jar">
+
+      <!-- manifest with module version, date -->
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Built-At" value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${codegen.tag}"/>
+      </manifest>
+
+      <!-- include mediaorb generated src only -->
+      <fileset dir="${gen.rbx1600dcm}">
+        <include name="**/*.java"/>
+      </fileset>
+    </jar>
+  </target>
+
+
+  <target name="clean" description="clean up" >
+    <delete dir="${bin}"/>
+    <delete dir="${gen.mediaorb}"/>
+    <delete dir="${gen.rbx1600dcm}"/>
+    <delete dir="${build}"/>
+  </target>
+
+
+  <!-- generate code for media manager app module -->
+  <target name="generate.mediamanageram"  description="run mediaorb code generator for media manage app module">
+
+    <!-- generate mediacatalog src -->
+    <java classname="com.streetfiresound.codegenerator.parser.CodeGenerator" fork="true">
+      <classpath>
+        <pathelement location="${bin}"/>
+      </classpath>
+      <arg line="IdlFile/MediaManagerAm.conf ${gen.mediamanageram} ${gen.mediaorb}"/>
+    </java>
+
+
+    <!-- generate src jar -->
+    <jar jarfile="${dist}/mediamanageram-rmi-src.jar">
+
+      <!-- manifest with module version, date -->
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Built-At" value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${codegen.tag}"/>
+      </manifest>
+
+      <!-- include mediaorb generated src only -->
+      <fileset dir="${gen.mediamanageram}">
+        <include name="**/*.java"/>
+      </fileset>
+    </jar>
+  </target>
+</project>

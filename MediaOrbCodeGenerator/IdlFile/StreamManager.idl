@@ -1,0 +1,323 @@
+module StreamManager
+{
+	enum Direction
+	{
+		IN,
+		OUT
+	};
+
+	enum OperationalStatus
+	{
+		NORMAL,
+		FAILURE,
+		UNKNOWN
+	};
+
+	enum FailureReason
+	{
+		STREAM_TYPE_MATCH_FAILURE,
+		TRANSMISSION_FORMAT_MATCH_FAILURE,
+		BANDWIDTH_FAILURE
+	};
+
+	enum TransportType 
+	{
+		CABLE, 
+		INTERNAL, 
+		IEC61883
+	};
+	
+	typedef unsigned short CableFormat;
+
+	struct InternalFormat
+	{
+		unsigned long reserved;
+	};
+	
+	struct IecFormat
+	{
+		octet fdf[4];
+		octet mask[4];
+	};
+	
+	union TransmissionFormat switch(TransportType)
+	{
+		case CABLE:	
+			CableFormat cableFormat;
+		case INTERNAL:
+			InternalFormat internalFormat;
+		case IEC61883:
+			IecFormat iecFormat;
+	};
+
+	struct StreamType
+	{
+		StreamTypeId id;
+		boolean constantRate;
+		unsigned long maxBandwidth;
+	};
+
+	struct ConnectionState
+	{
+		OperationalStatus status;
+		sequence<FailureReason>	failures;
+	};
+
+	enum DropReason
+	{
+		OWNER_REQUEST,
+		NON_OWNER_REQUEST,
+		SHARING_DISABLED,
+		OWNER_GONE,
+		SOURCE_FCM_GONE,
+		SINK_FCM_GONE,
+		SOURCE_POWER_OFF,
+		SINK_POWER_OFF,
+		DEVICE_CONNECTION_DROPPED,
+		SOURCE_DEVICE_GONE,
+		SINK_DEVICE_GONE,
+		RESTORE_FAILURE,
+		UNKNOWN,
+		IEC_BROADCAST_BROKEN
+	};
+
+	enum ChangeReason
+	{
+		STREAM_TYPE_CHANGED,
+		TRANSMISSION_FORMAT_CHANGED,
+		DEVICE_CONNECTION_CHANGED,
+		BANDWIDTH_ADAPTATION_FAILURE,
+		BANDWIDTH_ADAPTATION_SUCCESS
+	};
+	
+	struct CablePlug
+	{
+		Direction dir;
+		short cableNum;
+	};
+	
+	struct InternalPlug
+	{
+		Direction dir;
+		ushort	fcmIndex;
+		ushort	plugNum;
+	};
+	
+	struct IecPlug
+	{
+		Direction dir;
+		short pcrNum;
+	};
+	
+	struct FcmPlug
+	{
+		TargetId targetFcm;
+		Direction plugDir;
+		ushort plugNum;
+	};
+
+	union Plug switch(TransportType)
+	{
+		case CABLE:
+			CablePlug cablePlug;
+		case INTERNAL:	
+			InternalPlug internalPlug;
+		case IEC61883:
+			IecPlug iecPlug;
+	};
+
+	typedef short PlugNumber;
+	const PlugNumber ANY_PLUG = -1;
+
+	struct DeviceConnection
+	{
+		Plug src;
+		Plug dest;
+	};
+
+	typedef ushort IsocChannel;
+	const IsocChannel LEGACY_ISOC_CHANNEL	= 63;
+	const IsocChannel ASYNC_STREAM_ISOC_CHANNEL = 31;
+
+	struct ConnectionId
+	{
+		SEID mgr;
+		ushort seq;
+	};
+
+	enum ConnectionType
+	{
+		FLOW,
+		SPRAY,
+		TAP
+	};
+	
+	struct Stream
+	{
+		boolean hasSource;
+		FcmPlug source;
+		sequence<ConnectionId> connections;
+	};
+	
+	struct CableChannel
+	{
+		CablePlug source;
+		CablePlug sink;
+	};
+	
+	struct InternalChannel
+	{
+		unsigned long reserved;
+	};
+	
+	struct IecChannel
+	{
+		IsocChannel isocChannel;
+		IecPlug source;
+		IecPlug sink;
+	};
+	
+	union Channel switch(TransportType)
+	{
+		case CABLE:
+			CableChannel cableChannel;
+		case INTERNAL:	
+			InternalChannel internalChannel;
+		case IEC61883:
+			IecChannel iecChannel;
+	};
+	
+	struct Connection
+	{
+		ConnectionId connId;
+		ConnectionType connType;
+		ConnectionState connState;
+		StreamType streamType;
+		TransmissionFormat transmissionFormat;
+		SEID owner;
+		FcmPlug source;
+		FcmPlug sink;
+		Channel channel;
+		unsigned long allocBandwidth;
+	};
+
+	struct ConnectionHint
+	{
+		boolean anyTransport;
+		boolean anyStreamType;
+		boolean anyTransmissionFormat;
+		boolean anyChannel;
+		TransportType ttype;
+		StreamType stype;
+		TransmissionFormat tformat;
+		Channel channel;
+	};
+	
+	struct CablePlugStatus
+	{
+		boolean hasAttachment;
+		boolean hasLegacyFcm;
+	};
+	
+	struct InternalPlugStatus
+	{
+		boolean hasAttachment;
+		boolean hasInternalConnection;
+		boolean canShare;
+		SEID owner;
+	};
+	
+	struct IecPlugStatus
+	{
+		boolean dynamicBandwidthAllocation;
+		boolean hasAttachment;
+	};
+	
+	union PlugStatus switch(TransportType)
+	{
+		case CABLE:
+			CablePlugStatus cablePlugStatus;
+		case INTERNAL:	
+			InternalPlugStatus internalPlugStatus;
+		case IEC61883:
+			IecPlugStatus iecPlugStatus;
+	};
+	
+	typedef ushort ErrorCode;
+	const ErrorCode SUCCESS = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE = 0x0001;
+	const ErrorCode ACCESS_VIOLATION = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED = 0x0004;
+	const ErrorCode RESERVED = 0x0005;
+	const ErrorCode INVALID_PARAMETER = 0x0006;
+	const ErrorCode RESOURCE_LIMIT = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT = 0x000a;
+	const ErrorCode LOCAL = 0x000b;
+	const ErrorCode STANDBY = 0x000c;
+
+	const ErrorCode CONN_ID = 0x0080;
+	const ErrorCode SOURCE_FCM = 0x0081;
+	const ErrorCode SINK_FCM = 0x0082;
+	const ErrorCode SOURCE_PLUG = 0x0083;
+	const ErrorCode SINK_PLUG = 0x0084;
+	const ErrorCode UNSUP_TRANSPORT = 0x0085;
+	const ErrorCode UNSUP_STREAM = 0x0086;
+	const ErrorCode NO_MATCH_STREAM = 0x0087;
+	const ErrorCode NO_MATCH_FMT = 0x0088;
+	const ErrorCode NO_MATCH_TRANSPORT = 0x0089;
+	const ErrorCode NO_MATCH_DIR = 0x008a;
+	const ErrorCode SOURCE_BUSY = 0x008b;
+	const ErrorCode SINK_BUSY = 0x008c;
+	const ErrorCode DEV_BUSY = 0x008d;
+	const ErrorCode INSUFF_BANDWIDTH = 0x008e;
+	const ErrorCode INSUFF_CHANNEL = 0x008f;
+	const ErrorCode SM_ACCESS_VIOLATION = 0x0090;
+	const ErrorCode NETWORK = 0x0091;
+	const ErrorCode INVALID_CHANNEL = 0x0092;
+	const ErrorCode NO_MATCH_BW = 0x0093;
+	const ErrorCode NO_MATCH_SPEED = 0x0094;
+	const ErrorCode INVALID_FMT = 0x0095;
+	const ErrorCode CHANNEL_BUSY = 0x0096;
+	const ErrorCode ASYNC_CHANNEL = 0x0097;
+	const ErrorCode STATICBW = 0x0098;
+	const ErrorCode BROADCAST = 0x0099;
+	const ErrorCode RESERVED_SOURCE = 0x009a;
+	const ErrorCode RESERVED_SINK = 0x009b;
+	const ErrorCode DEV_CONN = 0x009c;
+	const ErrorCode SHARE = 0x009d;
+	const ErrorCode ANY_CHANNEL = 0x009e;
+
+    enum OperationId
+    {
+		FLOW_TO,
+		SPRAY_OUT,
+		TAP_IN,
+		DROP,
+		GET_LOCAL_CONNECTION_MAP,
+		GET_GLOBAL_CONNECTION_MAP,
+		GET_CONNECTION,
+		GET_STREAM
+	};
+
+	interface StreamManager
+	{
+		ConnectionId flowTo(in boolean dynamicBw, in FcmPlug source, in FcmPlug sink, in ConnectionHint hint);
+		ConnectionId sprayOut(in boolean dynamicBw, in FcmPlug source, in ConnectionHint hint);
+		ConnectionId tapIn(in FcmPlug sink, in ConnectionHint hint);
+		void drop(in ConnectionId connId);
+		sequence<Connection> getLocalConnectionMap();
+		sequence<Connection> getGlobalConnectionMap();
+		Connection getConnection(in ConnectionId connId);
+		Stream getStream(in ConnectionId connId);
+	};
+	
+	interface SystemEvent
+	{
+		void connectionAdded(in ConnectionId connId);
+		void connectionDropped(in ConnectionId connId, in sequence<DropReason> reasons);
+		void connectionChanged(in ConnectionId connId, in ConnectionState oldState, in ConnectionState newState, in ChangeReason reason);
+	};
+};

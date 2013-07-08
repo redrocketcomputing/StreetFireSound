@@ -1,0 +1,86 @@
+module SonyJukebox
+{
+	typedef unsigned short ushort;
+		
+	typedef unsigned long AvDiscPlayMode;
+	const AvDiscPlayMode DIRECT_ALL = 0x00000007;
+	const AvDiscPlayMode RANDOM_ALL = 0x00000008;
+	const AvDiscPlayMode SHUFFLE_ALL = 0x00000009;
+	const AvDiscPlayMode REPEAT_ALL = 0x0000000a;
+	
+	typedef unsigned long AvDiscScanMode;
+	const AvDiscScanMode SCAN_ALL = 0x0000000b;
+	const AvDiscScanMode SCAN_EMPTY_ONLY = 0x0000000c;
+	const AvDiscScanMode SCAN_FOR_EMPTY = 0x0000000d;
+	const AvDiscScanMode SCAN_CHANGED_SLOTS = 0x0000000e;
+			
+	typedef unsigned long AvDiscTransportMode;
+	const AvDiscTransportMode POWER_OFF = 0x00000008;
+	const AvDiscTransportMode DOOR_OPENED = 0x00000009;
+	
+	typedef unsigned long AvDiscCapability;
+	const AvDiscCapability SCAN = 0x00000009;
+	const AvDiscCapability POSITION_REPORTING = 0x0000000a;
+	const AvDiscCapability CUE = 0x0000000b;
+	
+	typedef ushort FcmAttributeIndicator;
+	const FcmAttributeIndicator CURRENT_POSITION = 0x0002;
+	
+	enum PositionReportMode
+	{
+		LIST,
+		INDEX,
+		HOUR,
+		MINUTE,
+		SECOND,
+		FRAME
+	};
+	
+	typedef ushort ErrorCode;
+	const ErrorCode SUCCESS                  = 0x0000;
+	const ErrorCode UNKNOWN_MESSAGE          = 0x0001;
+	const ErrorCode ACCESS_VIOLATION         = 0x0002;
+	const ErrorCode UNIDENTIFIED_FAILURE     = 0x0003;
+	const ErrorCode NOT_IMPLEMENTED          = 0x0004;
+	const ErrorCode RESERVED                 = 0x0005;
+	const ErrorCode INVALID_PARAMETER        = 0x0006;
+	const ErrorCode RESOURCE_LIMIT           = 0x0007;
+	const ErrorCode PARAMETER_SIZE_LIMIT     = 0x0008;
+	const ErrorCode INCOMPLETE_MESSAGE       = 0x0009;
+	const ErrorCode INCOMPLETE_RESULT        = 0x000a;
+	const ErrorCode LOCAL                    = 0x000b;
+	const ErrorCode STANDBY                  = 0x000c;
+
+	const ErrorCode NOT_SUPPORTED            = 0x0080;
+	const ErrorCode EMPTY_DISC               = 0x0081;
+	const ErrorCode NO_DISC                  = 0x0082;
+	const ErrorCode SHORT_CAPACITY           = 0x0083;
+	const ErrorCode READ_ERR                 = 0x0084;
+	const ErrorCode WRITE_ERR                = 0x0085;
+	const ErrorCode WRITE_PROTECTED          = 0x0086;
+	const ErrorCode DISC_FULL                = 0x0087;             
+	const ErrorCode TRACK_FULL               = 0x0088;
+	const ErrorCode TOC_EDIT_BUSY            = 0x0089;
+	const ErrorCode LOCKED                   = 0x008a;
+	const ErrorCode NO_CONNECTION            = 0x008b;
+	const ErrorCode TRANSITION_NOT_AVAILABLE = 0x008c;
+	const ErrorCode ABORTED                  = 0x008d;
+	
+	enum OperationId
+	{
+		CUE,
+		SCAN,
+		GET_SCAN_MODE,
+		SET_POSITION_REPORT_MODE,
+		GET_POSITION_REPORT_MODE
+	};
+
+	interface SonyJukebox
+	{
+		void cue(in AvDiscPlayMode playMode, in ushort plugNum, in ushort listNumber, in ushort indexNumber);
+		void scan(in AvDiscScanMode scanMode, in ushort startList, in ushort endList);
+		AvDiscScanMode getScanMode();
+		void setPositionReportMode(in PositionReportMode positionReportMode);
+		PositionReportMode getPositionReportMode();
+	};
+};

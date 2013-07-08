@@ -1,0 +1,27 @@
+1) Create device build for application (wsddbuild.xml)
+2) Build JXE
+3) Export JXE to /home/development/bsp/filesystem/<hostname>/home/applications
+4) Build debug launch "Remote Device Java Application" with <hostname> as connection target and timeout 60000
+5) run debug launch
+5) telnet <hostname>
+6) cd /home/applications
+7) j9 -debug:8096 -jcl:max -Xbootclasspath:/opt/wsdd5.0/lib/jclMax/classes.zip -jxe:<application name>.jxe
+8) Debugger should connect
+
+If the device has be rebooted:
+
+1) telnet <hostname>
+2) cd /home/modules
+3) ./loadmodules
+4) goto 1 above
+
+Using MicroAnalyzer
+
+1) Turn on MicroAnalyzer on remote target (RBX-1600)
+
+Add the following arguments to the command line:
+-analyze -Xnojit
+i.e. j9 -anaylze -Xnojit -jcl:max -Xbootclasspath:/opt/wsdd5.0/lib/jclMax/classes.zip -jxe:<application name>.jxe
+
+2) Switch to Analyzer Perspective on WSDD.
+3) Click on the "Connect to a running VM" icon and type in the IP of the RBX-1600 to be analyzed.

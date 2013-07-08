@@ -1,0 +1,30 @@
+<!-- 
+  Simple build file for dev use
+  export ANT_OPTS="-server -Xmx512m" or similar if memory is an issue (can be with mediaOrb)
+-->
+<project name="all.build" default="build">
+  <property name="dev" value="true"/>
+
+  <target name="build">
+    <ant dir="Util" />
+    <ant dir="MediaOrbCodeGenerator"/>
+    <ant dir="MediaOrb"/>
+    <ant dir="Rbx1600"/>
+    <ant dir="Rbx1600Dcm"/>
+    <ant dir="MediaManagerAm"/>
+    <ant dir="Client"/>
+    <ant dir="LiquidLnF"/>
+  </target>
+
+  <target name="clean">
+    <ant dir="Util"                  target="clean"/>
+    <ant dir="MediaOrbCodeGenerator" target="clean"/>
+    <ant dir="MediaOrb"              target="clean"/>
+    <ant dir="Rbx1600"               target="clean"/>
+    <ant dir="Rbx1600Dcm"            target="clean"/>
+    <ant dir="MediaManagerAm"        target="clean"/>
+    <ant dir="Client"                target="clean"/>
+    <ant dir="LiquidLnF"             target="clean"/>
+  </target>
+
+</project>

@@ -1,0 +1,274 @@
+<project name="Rbx1600" default="compile" basedir=".">
+  <description>
+    Rbx1600 application and client support library build file
+  </description>
+
+  <!-- tweak classpath if a dev build -->
+  <condition property="classpath" value="../Util/bin:../MediaOrb/bin:../Rbx1600/bin">
+    <isset property="dev"/>
+  </condition>
+
+  <!-- default classpath looks in lib dirs -->
+  <property name="classpath"                value="./lib/util.jar:./lib/mediaorb.jar:./lib/rbx1600.jar"/>
+
+  <!-- path properties -->
+  <property name="src.dir"                  location="src"/>
+  <property name="bin.dir"                  location="bin"/>
+  <property name="rbx1600clientlib.src.dir" location="RMI"/>
+  <property name="rbx1600clientlib.bin.dir" location="rbx1600clientlib-bin"/>
+  <property name="lib.dir"                  location="lib"/>
+  <property name="dist.dir"                 location="dist"/>
+  <property name="buildtmp.dir"             location="buildtmp"/>
+
+  <!-- application update package settings -->
+  <property name="appupdate.type"  value="APP_UPDATE"/>
+  <property name="appupdate.minor" value="1"/>
+  <property name="appupdate.major" value="0"/>
+  <property name="appupdate.patch" value="0"/>
+
+  <!-- compiler settings -->
+  <property name="debug" value="on"/>
+  <property name="target" value="1.3"/>
+
+  <!-- default value for tag (placed in jar manifest) -->
+  <property name="rbx1600.tag" value="DEVELOPMENT"/>
+
+  <!-- jar dependencies -->
+  <fileset id="project.jars" dir="${lib.dir}">
+    <include name="util.jar"/>
+    <include name="havi.jar"/>
+  </fileset>
+
+
+  <!-- initialize build -->
+  <target name="init">
+
+    <!-- Create the time stamp -->
+    <tstamp/>
+
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${bin.dir}"/>
+    <mkdir dir="${rbx1600clientlib.bin.dir}"/>
+    <mkdir dir="${lib.dir}"/>
+    <mkdir dir="${dist.dir}"/>
+  </target>
+
+
+  <!-- compile the rbx1600 client library -->
+  <target name="compile-rbx1600clientlib" depends="init" description="compile the rbx1600 client library source"> 
+    <!-- Compile the java code from ${rbx1600clientlib.src.dir} into ${rbx1600clientlib.bin.dir} -->
+    <javac srcdir="${rbx1600clientlib.src.dir}" destdir="${rbx1600clientlib.bin.dir}" debug="${debug}" target="${target}" classpath="${classpath}"/>
+  </target>
+
+
+  <!-- compile the rbx1600 application -->
+  <target name="compile" depends="init, compile-rbx1600clientlib" description="compile the rbx1600 project source"> 
+    <!-- Compile the java code from ${src.dir} into ${bin.dir} -->
+    <!-- XXX:00000000000000000:20050224iain: remove failonerror attribute when code fixed -->
+    <javac srcdir="${src.dir}" destdir="${bin.dir}" classpath="${rbx1600clientlib.bin.dir}:${classpath}" failonerror="false"/>
+  </target>
+
+
+  <!-- assemble the distribution jars after making dependencies -->
+  <target name="dist" depends="compile">
+    <antcall target="makejars"/>
+    <antcall target="makesrcjars"/>
+  </target>
+
+
+  <!-- assemble the distribution jars without checking dependencies -->
+  <target name="makejars" depends="init">
+
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist.dir}/lib"/>
+
+    <!-- Create the client library jar -->
+    <jar jarfile="${dist.dir}/lib/rbx1600dcm-client.jar">
+
+      <!-- include manifest with version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${rbx1600.tag}"/>
+      </manifest>
+
+      <!-- include generated RMI classes -->
+      <fileset dir="${rbx1600clientlib.bin.dir}"/>
+
+      <!-- also include a few special non-generated files -->
+      <fileset dir="${bin.dir}">
+        <include name="com/redrocketcomputing/rbx1600/maintenance/BackupMaintenanceClient.class"/>
+        <include name="com/redrocketcomputing/rbx1600/maintenance/Rbx1600MaintenanceConstants.class"/>
+        <include name="com/redrocketcomputing/havi/fcm/sonyjukbox/constants/*.class"/>
+        <include name="com/redrocketcomputing/havi/fcm/sonyjukbox/types/*.class"/>
+        <include name="com/redrocketcomputing/havi/fcm/sonyjukbox/rmi/*.class"/>
+        <include name="com/redrocketcomputing/havi/constants/*.class"/>
+        <include name="com/redrocketcomputing/havi/system/compatibility/*.class"/>
+        <include name="com/redrocketcomputing/rbx1600/maintenance/GetDeviceLogMaintenanceClient.class"/>
+        <include name="com/redrocketcomputing/rbx1600/maintenance/RestoreMaintenanceClient.class"/>
+        <include name="com/redrocketcomputing/rbx1600/maintenance/UpgradeMaintenanceClient.class"/>
+        <include name="com/redrocketcomputing/rbx1600/maintenance/RebootDeviceMaintenanceClient.class"/>
+      </fileset>
+    </jar>
+
+    <!-- create the application jar -->
+    <jar jarfile="${dist.dir}/lib/rbx1600dcm.jar">
+
+      <!-- include manifest with main class and version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${rbx1600.tag}"/>
+        <attribute name="Main-Class"     value="com.redrocketcomputing.rbx1600.Rbx1600Application"/>
+      </manifest>
+
+      <!-- include all compiled srcs -->
+      <fileset dir="${bin.dir}"/>
+    </jar>
+  </target>
+
+
+
+  <!-- assemble the distribution src jars  -->
+  <target name="makesrcjars" depends="init">
+
+    <!-- create the distribution directory -->
+    <mkdir dir="${dist.dir}/src"/>
+
+    <!-- start with the rmi src jar -->
+    <jar jarfile="${dist.dir}/src/rbx1600dcm-client-src.jar">
+
+      <!-- include manifest with version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${rbx1600.tag}"/>
+      </manifest>
+
+      <!-- include generated RMI src -->
+      <fileset dir="${rbx1600clientlib.src.dir}"/>
+
+      <!-- also include a few special non-generated files -->
+      <!-- XXX:0000:20041020iain: use ref to mapped class fileset in makejars target -->
+      <fileset dir="${src.dir}">
+        <include name="com/redrocketcomputing/rbx1600/maintenance/BackupMaintenanceClient.java"/>
+        <include name="com/redrocketcomputing/rbx1600/maintenance/Rbx1600MaintenanceConstants.java"/>
+        <include name="com/redrocketcomputing/havi/constants/ConstStreetFireInterfaceId.java"/>
+        <include name="com/redrocketcomputing/havi/constants/ConstStreetFireNativeProtocol.java"/>
+        <include name="com/redrocketcomputing/havi/system/compatibility/*.java"/>
+        <include name="com/redrocketcomputing/rbx1600/maintenance/GetDeviceLogMaintenanceClient.java"/>
+        <include name="com/redrocketcomputing/rbx1600/maintenance/RestoreMaintenanceClient.java"/>
+        <include name="com/redrocketcomputing/rbx1600/maintenance/UpgradeMaintenanceClient.java"/>
+        <include name="com/redrocketcomputing/rbx1600/maintenance/RebootDeviceMaintenanceClient.java"/>
+      </fileset>
+    </jar>
+
+    <!-- create the application src jar -->
+    <jar jarfile="${dist.dir}/src/rbx1600dcm-src.jar">
+
+      <!-- include manifest with main class and version/build info -->
+      <manifest>
+        <attribute name="Built-By"       value="${user.name}"/>
+        <attribute name="Built-At"       value="${TSTAMP} ${TODAY}"/>
+        <attribute name="Module-Version" value="${rbx1600.tag}"/>
+      </manifest>
+
+      <!-- include all compiled srcs -->
+      <fileset dir="${src.dir}"/>
+    </jar>
+  </target>
+
+
+
+
+  <!-- create a device update from development tree -->
+  <!-- XXX:0:20041019iain: hack -->
+  <target name="create-update-dev" depends="init">
+    <antcall target="create-update-nodeps"/>
+  </target>
+
+
+  <!-- create a device update package -->
+  <target name="create-update" depends="dist">
+    <antcall target="create-update-nodeps"/>
+  </target>
+
+  <!-- create a device update package without checking dependencies-->
+  <target name="create-update-nodeps" depends="init">
+
+    <!-- create temp dir -->
+    <mkdir dir="${buildtmp.dir}"/>
+
+    <!-- create a manifest -->
+    <echo file="${buildtmp.dir}/manifest">TYPE=${appupdate.type}
+MAJOR_VERSION=${appupdate.major}
+MINOR_VERSION=${appupdate.minor}
+PATCH_LEVEL=${appupdate.patch}
+RBX1600_TAG=${rbx1600.tag}
+DATESTAMP=${DSTAMP}
+TIMESTAMP=${TSTAMP}
+</echo>
+
+    <!-- pack the content tgz -->
+    <!--
+      XXX:000:20041019iain: tar using tar task did not unpack with busybox, exec instead
+    <tar tarfile="${buildtmp.dir}/rbx1600.tgz" compression="gzip">
+
+      - include application properties file -
+      <tarfileset dir="configuration">
+        <include name="application.properties"/>
+      </tarfileset>
+
+      - include rbx1600 jars -
+      <tarfileset dir="${dist.dir}/lib">
+        <include name="rbx1600.jar"/>
+        <include name="rbx1600-client.jar"/>
+      </tarfileset>
+
+      - include dependency jars -
+      <tarfileset dir="${lib.dir}">
+        <include name="havi.jar"/>
+        <include name="util.jar"/>
+      </tarfileset>
+    </tar>
+    -->
+    <!-- start with application properties file -->
+    <exec executable="tar">
+      <arg line="czf ${buildtmp.dir}/rbx1600.tgz -C configuration application.properties -C ${dist.dir}/lib rbx1600.jar rbx1600-client.jar -C ${lib.dir} havi.jar util.jar"/>
+    </exec>
+
+
+    <!-- pack the app update tar with manifest -->
+    <!--
+      XXX:000:20041019iain: tar using tar task did not unpack with busybox, exec instead
+      <tar tarfile="${dist.dir}/app_update.rbx1600">
+        <tarfileset dir="${buildtmp.dir}">
+          <include name="rbx1600.tgz"/>
+          <include name="manifest"/>
+        </tarfileset>
+      </tar>
+    -->
+    <exec executable="tar" dir="${buildtmp.dir}">
+      <arg line="cvf ${dist.dir}/app_update-${rbx1600.tag}.rbx1600 rbx1600.tgz manifest"/>
+    </exec>
+
+    <!-- remove temp dir -->
+    <mkdir dir="${buildtmp.dir}"/>
+  </target>
+
+
+  <!-- clean tempdir unless sources.keep set -->
+  <target name="cleantemp" unless="sources.keep">
+    <delete dir="${buildtmp.dir}"/>
+  </target>
+
+
+  <!-- clean up -->
+  <target name="clean" description="clean up">
+    <delete dir="${rbx1600clientlib.bin.dir}"/>
+    <delete dir="${bin.dir}"/>
+    <delete dir="${buildtmp.dir}"/>
+    <delete dir="${dist.dir}"/>
+  </target>
+
+</project>
